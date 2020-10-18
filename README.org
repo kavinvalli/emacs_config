@@ -1,6 +1,7 @@
 * Kavin's Emacs Configuration
 This repo contains my emacs configuration which I have been working on with references from
 [[https://www.youtube.com/watch?v=74zOY-vgkyw&list=PLEoMzSkcN8oPH1au7H6B7bBJ4ZO7BXjSZ][System Crafters Emacs From Scratch]] playlist
+@daviwill/emacs-from-scratch
 
 ** Installing Emacs in MacOS
 #+begin_src sh
