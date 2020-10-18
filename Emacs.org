@@ -1,5 +1,40 @@
-#+title Emacs Scratch Configuration
+#+TITLE: Emacs Scratch Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+
+* Table of Contents
+:PROPERTIES:
+:TOC:      :include all :ignore this
+:END:
+:CONTENTS:
+- [[#package-system-setup][Package System Setup]]
+- [[#basic-ui-configuration][Basic UI Configuration]]
+  - [[#font-configuration][Font Configuration]]
+- [[#keybinding-configuration][Keybinding Configuration]]
+- [[#ui-configuration][UI Configuration]]
+  - [[#command-log-mode][Command Log Mode]]
+  - [[#ivy-and-counsel][Ivy and Counsel]]
+  - [[#helpful-help-commands][Helpful Help Commands]]
+  - [[#autopair-config][Autopair Config]]
+  - [[#text-scaling][Text Scaling]]
+- [[#org-mode][Org Mode]]
+  - [[#basic-config][Basic Config]]
+    - [[#setup][Setup]]
+    - [[#font-configuration][Font Configuration]]
+    - [[#use-org][Use Org]]
+    - [[#tag-list][Tag List]]
+    - [[#custom-commands][Custom Commands]]
+    - [[#capture-templates][Capture Templates]]
+    - [[#org-mode-ui][Org mode UI]]
+  - [[#configure-babel-languages][Configure Babel Languages]]
+  - [[#table-of-contents][Table of Contents]]
+  - [[#create-template][Create Template]]
+  - [[#auto-tangle-configuration-files][Auto-tangle Configuration Files]]
+- [[#development][Development]]
+  - [[#projectile][Projectile]]
+  - [[#magit][Magit]]
+- [[#applications][Applications]]
+  - [[#some-app][Some App]]
+:END:
 * Package System Setup
 #+begin_src emacs-lisp
 (require 'package)
@@ -414,6 +449,11 @@
 
 #+end_src
 
+** Table of Contents
+#+begin_src emacs-lisp
+(use-package org-make-toc
+  :hook (org-mode . org-make-toc-mode))
+#+end_src
 ** Create Template
 #+begin_src emacs-lisp
 
@@ -468,19 +508,6 @@
 
 (use-package forge)
 
-#+end_src
-* Window Management
-#+begin_src emacs-lisp
-(use-package exwm
-     :config
-     (require 'exwm-config)
-     (exwm-config-default)
-     (require 'exwm-randr)
-     (setq exwm-randr-workspace-output-plist '(0 "Virtual-1"))
-     (add-hook 'exwm-randr-screen-change-hook
-                (lambda ()
-                   (start-process-shell-command
-                    ))))
 #+end_src
 * Applications
 ** Some App

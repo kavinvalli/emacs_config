@@ -346,6 +346,9 @@
 
 (push '("conf-unix" . counf-unix) org-src-lang-modes)
 
+(use-package org-make-toc
+  :hook (org-mode . org-make-toc-mode))
+
 (require 'org-tempo)
 (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
@@ -384,28 +387,4 @@
 
 (use-package forge)
 
-(use-package exwm
-     :config
-     (require 'exwm-config)
-     (exwm-config-default)
-     (require 'exwm-randr)
-     (setq exwm-randr-workspace-output-plist '(0 "Virtual-1"))
-     (add-hook 'exwm-randr-screen-change-hook
-                (lambda ()
-                   (start-process-shell-command
-                    ))))
-
 (+ 50 100)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(exwm which-key visual-fill-column visual-fill use-package rainbow-delimiters org-bullets org-alert ivy-rich hydra helpful general forge evil-magit evil-collection emmet-mode doom-themes doom-modeline counsel-projectile company-tabnine command-log-mode autopair)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
