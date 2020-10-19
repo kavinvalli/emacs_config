@@ -51,12 +51,14 @@
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-(set-face-attribute 'default nil :font "MesloLGS NF" :height runemacs/default-font-size)
-
-;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "MesloLGS NF" :height 140)
-
-;; Set the variable pitch face
+(when (equal system-name "Kavins-Air.Dlink")
+    (set-face-attribute 'default nil :font "MesloLGS NF" :height runemacs/default-font-size)
+    (set-face-attribute 'fixed-pitch nil :font "MesloLGS NF" :height 140)
+)
+(when (equal system-name "kavin-pc")
+    (set-face-attribute 'default nil :font "Fira Code Retina" :height runemacs/default-font-size)
+    (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 140)
+)
 (set-face-attribute 'variable-pitch nil :family "Cantarell" :height 160 :weight 'regular)
 
 ;; General Setup
