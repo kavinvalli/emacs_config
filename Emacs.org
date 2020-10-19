@@ -33,6 +33,7 @@
 - [[#development][Development]]
   - [[#projectile][Projectile]]
   - [[#magit][Magit]]
+    - [[#configuration][Configuration]]
 - [[#applications][Applications]]
   - [[#some-app][Some App]]
 :END:
@@ -510,6 +511,18 @@
 
 #+end_src
 ** Magit
+Befor using Forge, remember to do the following
+- Go to [[https://github.com][Github]]
+- Create a personal access token in [[https://github.com/settings/tokens][Personal Access Tokens tab]]
+- In your device run
+#+begin_src sh
+vi ~/.authinfo
+#+end_src
+- Add the following
+#+begin_src
+machine api.github.com login <you-username>^forge password <token-created>
+#+end_src
+*** Configuration
 #+begin_src emacs-lisp
 
 (use-package magit
