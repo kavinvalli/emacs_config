@@ -29,6 +29,7 @@
   - [[#table-of-contents][Table of Contents]]
   - [[#create-template][Create Template]]
   - [[#auto-tangle-configuration-files][Auto-tangle Configuration Files]]
+- [[#utilities][Utilities]]
 - [[#development][Development]]
   - [[#projectile][Projectile]]
   - [[#magit][Magit]]
@@ -475,6 +476,20 @@
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 #+end_src
 
+* Utilities
+#+begin_src emacs-lisp
+(use-package counsel-osx-app
+  :bind* ("S-M-SPC" . counsel-osx-app)
+  :commands counsel-osx-app
+  :config
+  (setq counsel-osx-app-location
+        (list "/Applications"
+              "/Applications/Misc"
+              "/Applications/Utilities"
+              (expand-file-name "~/Applications")
+              (expand-file-name "~/.nix-profile/Applications")
+              "/Applications/Xcode.app/Contents/Applications")))
+#+end_src
 * Development
 ** Projectile
 #+begin_src emacs-lisp
@@ -523,3 +538,4 @@ value=<<the-value()>>
 #+end_src
 
 Add =:noweb yes=!
+

@@ -362,6 +362,18 @@
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 
+(use-package counsel-osx-app
+  :bind* ("S-M-SPC" . counsel-osx-app)
+  :commands counsel-osx-app
+  :config
+  (setq counsel-osx-app-location
+        (list "/Applications"
+              "/Applications/Misc"
+              "/Applications/Utilities"
+              (expand-file-name "~/Applications")
+              (expand-file-name "~/.nix-profile/Applications")
+              "/Applications/Xcode.app/Contents/Applications")))
+
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
@@ -388,3 +400,16 @@
 (use-package forge)
 
 (+ 50 100)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(counsel-osx-app which-key visual-fill-column visual-fill use-package rainbow-delimiters org-make-toc org-bullets org-alert ivy-rich hydra helpful general forge exwm evil-magit evil-collection emmet-mode doom-themes doom-modeline counsel-projectile company-tabnine command-log-mode autopair)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

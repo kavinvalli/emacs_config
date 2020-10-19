@@ -8,8 +8,13 @@
 brew install emacs
 #+end_src
 ** Using this Configuration
+*** OSX
 #+begin_src sh
 mv ~/.emacs.d ~/.emacs.bck.d && git clone https://github.com/kavin25/emacs_config.git ~/.emacs.d
+#+end_src
+*** Linux
+#+begin_src sh
+mv /home/.emacs.d /home/.emacs.bck.d && git clone https://github.com/kavin25/emacs_config.git /home/.emacs.d
 #+end_src
 ** Opening Emacs
 #+begin_src sh
