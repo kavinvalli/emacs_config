@@ -213,6 +213,7 @@
 
 (use-package org
   :hook (org-mode . efs/org-mode-setup)
+  :ensure org-plus-contrib
   :config
   (setq org-ellipsis " ▾")
 
@@ -321,12 +322,8 @@
 
       ("w" "Workflows")
       ("we" "Checking Email" entry (file+olp+datetree "~/Documents/projects/emacs-from-scratch/Journal.org")
-           "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
+           "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)))
 
-      ("m" "Metrics Capture")
-      ("mw" "Weight" table-line (file+headline "~/Documents/projects/emacs-from-scratch/Metrics.org" "Weight")
-       "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
-       
 (define-key global-map (kbd "C-c j")
   (lambda () (interactive) (org-capture nil "jj")))
 
@@ -364,6 +361,14 @@
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 
+(use-package org-alert
+  :ensure t
+   :custom (alert-default-style 'osx-notifier)
+   :config
+   (setq org-alert-interval 300
+         org-alert-notification-title "Reminder!")
+   (org-alert-enable))
+
 (use-package counsel-osx-app
   :bind* ("S-M-SPC" . counsel-osx-app)
   :commands counsel-osx-app
@@ -375,6 +380,13 @@
               (expand-file-name "~/Applications")
               (expand-file-name "~/.nix-profile/Applications")
               "/Applications/Xcode.app/Contents/Applications")))
+
+(use-package elcord
+  :ensure t
+  :custom
+  (elcord-display-buffer-details nil)
+  :config
+  (elcord-mode))
 
 (use-package projectile
   :diminish projectile-mode
