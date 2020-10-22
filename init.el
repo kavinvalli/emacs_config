@@ -1,19 +1,35 @@
+(setq gc-cons-threshold (* 50 1000 1000))
+
+;; Profile emacs startup
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (message "*** Emacs loaded in %s with %d garbage collections."
+                     (format "%.2f seconds"
+                             (float-time
+                              (time-subtract after-init-time before-init-time)))
+                     gcs-done)))
+
 (require 'package)
 
-    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                             ("org" . "https://orgmode.org/elpa/")
-                             ("elpa" . "https://elpa.gnu.org/packages/")))
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
 
-    (package-initialize)
-    (unless package-archive-contents
-    (package-refresh-contents))
 
-    ;; Initialize use-package on non-Linux platforms
-    (unless (package-installed-p 'use-package)
-    (package-install 'use-package))
+(package-initialize)
+(unless package-archive-contents
+  (package-refresh-contents))
 
-    (require 'use-package)
-    (setq use-package-always-ensure t)
+;; Initialize use-package on non-Linux platforms
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
+;; (unless (package-installed-p 'persist)
+;;   (package-install 'persist))
+(setq package-check-signature nil)
+
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 (use-package exec-path-from-shell
   :init
@@ -44,7 +60,7 @@
     (run-with-timer flash-sec nil #'invert-face 'mode-line)
     (run-with-timer (* 2 flash-sec) nil #'invert-face 'mode-line)
     (run-with-timer (* 3 flash-sec) nil #'invert-face 'mode-line)))
-    
+
 (column-number-mode)
 (global-display-line-numbers-mode t)
 
@@ -100,7 +116,7 @@
   :after evil
   :config
   (evil-collection-init))
-  
+
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 (use-package command-log-mode)
@@ -167,6 +183,35 @@
 (use-package autopair)
 (autopair-global-mode)
 
+(use-package emmet-mode
+  :diminish (emmet-mode . "ε")
+  :bind* (("C-)" . emmet-next-edit-point)
+          ("C-(" . emmet-prev-edit-point)
+          ("M-<tab>" . emmet-expand-line))
+  :commands (emmet-mode
+             emmet-next-edit-point
+             emmet-prev-edit-point)
+  :init
+  (setq emmet-indentation 2)
+  (setq emmet-move-cursor-between-quotes t)
+  :config
+  ;; Auto-start on any markup modes
+  (add-hook 'sgml-mode-hook 'emmet-mode)
+  (add-hook 'web-mode-hook 'emmet-mode)
+  (setq emmet-expand-jsx-className? t)
+  (setq emmet-self-closing-tag-style " /"))
+
+(use-package yasnippet
+  :init
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  :config
+  (yas-global-mode))
+
+(provide 'init-yasnippet)
+
+(use-package evil-nerd-commenter
+  :bind ("s-/" . evilnc-comment-or-uncomment-lines))
+
 (use-package hydra)
 
 (defhydra hydra-text-scale (:timeout 4)
@@ -224,10 +269,11 @@
   (setq org-agenda-start-with-log-mode t)
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
-  
+
   (setq org-agenda-files
-	'("~/Documents/projects/emacs-from-scratch/Tasks.org"
-	  "~/Documents/projects/emacs-from-scratch/Birthdays.org"))
+        '("~/Notes/Tasks.org"
+          "~/Notes/Birthdays.org"
+          "~/Notes/Calendar.org"))
 
   (setq org-refile-targets
     '(("Archive.org" :maxlevel . 1)
@@ -236,8 +282,8 @@
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
   (setq org-todo-keywords
-	'((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-	  (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
 
   (efs/org-font-setup))
 
@@ -308,24 +354,24 @@
 
 (setq org-capture-templates
     `(("t" "Tasks / Projects")
-      ("tt" "Task" entry (file+olp "~/Documents/projects/emacs-from-scratch/Tasks.org" "Inbox")
+      ("tt" "Task" entry (file+olp "~/Notes/Tasks.org" "Inbox")
            "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
       ("j" "Journal Entries")
       ("jj" "Journal" entry
-           (file+olp+datetree "~/Documents/projects/emacs-from-scratch/Journal.org")
+           (file+olp+datetree "~/Notes/Journal.org")
            "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
            ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
            :clock-in :clock-resume
            :empty-lines 1)
       ("jm" "Meeting" entry
-           (file+olp+datetree "~/Documents/projects/emacs-from-scratch/Journal.org")
+           (file+olp+datetree "~/Notes/Journal.org")
            "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
            :clock-in :clock-resume
            :empty-lines 1)
 
       ("w" "Workflows")
-      ("we" "Checking Email" entry (file+olp+datetree "~/Documents/projects/emacs-from-scratch/Journal.org")
+      ("we" "Checking Email" entry (file+olp+datetree "~/Notes/Journal.org")
            "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)))
 
 (define-key global-map (kbd "C-c j")
@@ -357,7 +403,8 @@
   :hook (org-mode . org-make-toc-mode))
 
 (require 'org-tempo)
-(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+(add-to-list 'org-structure-template-alist '("temp" . " "))
+(add-to-list 'org-structure-template-alist '("sh" . "src sh"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
 
@@ -441,17 +488,17 @@
   "api" 'password-store-insert
   "apg" 'password-store-generate)
 
+(use-package org-gcal
+     :after org
+     :config
+
+     (setq org-gcal-client-id (password-store-get "API/Google/kavinvalli-emacs-id")
+           org-gcal-client-secret (password-store-get "API/Google/kavinvalli-emacs-secret")
+           org-gcal-file-alist '(("kavinvalli@gmail.com" . "~/Notes/Calendar.org"))))
+
+(rune/leader-keys
+  "ac" '(:ignore t :which-key "calendar")
+  "acs" '(org-gcal-fetch :which-key "sync")
+  "acp" '(org-gcal-post-at-point))
+
 (+ 50 100)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(exec-path-from-shell org-special-block-extras lorem-ipsum which-key visual-fill-column visual-fill use-package rainbow-delimiters org-wild-notifier org-plus-contrib org-make-toc org-bullets org-alert ivy-rich ivy-pass hydra helpful general forge exwm evil-magit evil-collection emmet-mode elcord doom-themes doom-modeline counsel-projectile counsel-osx-app company-tabnine command-log-mode autopair)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
