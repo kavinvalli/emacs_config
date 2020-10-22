@@ -37,6 +37,7 @@
   - [[#projectile][Projectile]]
   - [[#magit][Magit]]
     - [[#configuration][Configuration]]
+- [[#credential-management][Credential Management]]
 - [[#applications][Applications]]
   - [[#some-app][Some App]]
 :END:
@@ -561,6 +562,26 @@ machine api.github.com login <you-username>^forge password <token-created>
 
 (use-package forge)
 
+#+end_src
+* Credential Management
+- pass to manage all passwords locally
+- ivy-pass to make managing passwords easier in Emacs
+- auth-source-pass to store passwords in one place
+#+begin_src emacs-lisp
+(use-package ivy-pass
+  :commands ivy-pass
+  :config
+  (setq password-store-password-length 12))
+
+(use-package auth-source-pass
+  :config
+  (auth-source-pass-enable))
+
+(rune/leader-keys
+  "ap" '(:ignore t :which-key "pass")
+  "app" 'ivy-pass
+  "api" 'password-store-insert
+  "apg" 'password-store-generate)
 #+end_src
 * Applications
 ** Some App

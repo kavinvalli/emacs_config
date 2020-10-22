@@ -413,4 +413,19 @@
 
 (use-package forge)
 
+(use-package ivy-pass
+  :commands ivy-pass
+  :config
+  (setq password-store-password-length 12))
+
+(use-package auth-source-pass
+  :config
+  (auth-source-pass-enable))
+
+(rune/leader-keys
+  "ap" '(:ignore t :which-key "pass")
+  "app" 'ivy-pass
+  "api" 'password-store-insert
+  "apg" 'password-store-generate)
+
 (+ 50 100)
