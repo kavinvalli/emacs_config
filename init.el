@@ -1,19 +1,23 @@
 (require 'package)
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
-                         
-(package-initialize)
-(unless package-archive-contents
-(package-refresh-contents))
+    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                             ("org" . "https://orgmode.org/elpa/")
+                             ("elpa" . "https://elpa.gnu.org/packages/")))
 
-;; Initialize use-package on non-Linux platforms
-(unless (package-installed-p 'use-package)
-(package-install 'use-package))
+    (package-initialize)
+    (unless package-archive-contents
+    (package-refresh-contents))
 
-(require 'use-package)
-(setq use-package-always-ensure t)
+    ;; Initialize use-package on non-Linux platforms
+    (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
+
+    (require 'use-package)
+    (setq use-package-always-ensure t)
+
+(use-package exec-path-from-shell
+  :init
+  (exec-path-from-shell-initialize))
 
 (defvar runemacs/default-font-size 135)
 
@@ -345,6 +349,10 @@
 
 (push '("conf-unix" . counf-unix) org-src-lang-modes)
 
+(use-package org-special-block-extras
+  :ensure t
+  :hook (org-mode . org-special-block-extras-mode))
+
 (use-package org-make-toc
   :hook (org-mode . org-make-toc-mode))
 
@@ -413,6 +421,11 @@
 
 (use-package forge)
 
+(use-package lorem-ipsum
+  :ensure t
+  :config
+  (lorem-ipsum-use-default-bindings))
+
 (use-package ivy-pass
   :commands ivy-pass
   :config
@@ -429,3 +442,16 @@
   "apg" 'password-store-generate)
 
 (+ 50 100)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(exec-path-from-shell org-special-block-extras lorem-ipsum which-key visual-fill-column visual-fill use-package rainbow-delimiters org-wild-notifier org-plus-contrib org-make-toc org-bullets org-alert ivy-rich ivy-pass hydra helpful general forge exwm evil-magit evil-collection emmet-mode elcord doom-themes doom-modeline counsel-projectile counsel-osx-app company-tabnine command-log-mode autopair)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

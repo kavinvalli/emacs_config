@@ -26,6 +26,7 @@
     - [[#capture-templates][Capture Templates]]
     - [[#org-mode-ui][Org mode UI]]
   - [[#configure-babel-languages][Configure Babel Languages]]
+  - [[#org-special-block][Org Special Block]]
   - [[#table-of-contents][Table of Contents]]
   - [[#create-template][Create Template]]
   - [[#auto-tangle-configuration-files][Auto-tangle Configuration Files]]
@@ -37,28 +38,33 @@
   - [[#projectile][Projectile]]
   - [[#magit][Magit]]
     - [[#configuration][Configuration]]
+  - [[#lorem-ipsum][Lorem Ipsum]]
 - [[#credential-management][Credential Management]]
 - [[#applications][Applications]]
   - [[#some-app][Some App]]
 :END:
 * Package System Setup
 #+begin_src emacs-lisp
-(require 'package)
+      (require 'package)
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
-                         
-(package-initialize)
-(unless package-archive-contents
-(package-refresh-contents))
+      (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                               ("org" . "https://orgmode.org/elpa/")
+                               ("elpa" . "https://elpa.gnu.org/packages/")))
 
-;; Initialize use-package on non-Linux platforms
-(unless (package-installed-p 'use-package)
-(package-install 'use-package))
+      (package-initialize)
+      (unless package-archive-contents
+      (package-refresh-contents))
 
-(require 'use-package)
-(setq use-package-always-ensure t)
+      ;; Initialize use-package on non-Linux platforms
+      (unless (package-installed-p 'use-package)
+      (package-install 'use-package))
+
+      (require 'use-package)
+      (setq use-package-always-ensure t)
+
+  (use-package exec-path-from-shell
+    :init
+    (exec-path-from-shell-initialize))
 
 #+end_src
 * Basic UI Configuration
@@ -454,6 +460,12 @@
 
 #+end_src
 
+** Org Special Block
+#+begin_src emacs-lisp
+(use-package org-special-block-extras
+  :ensure t
+  :hook (org-mode . org-special-block-extras-mode))
+#+end_src
 ** Table of Contents
 #+begin_src emacs-lisp
 (use-package org-make-toc
@@ -562,6 +574,13 @@ machine api.github.com login <you-username>^forge password <token-created>
 
 (use-package forge)
 
+#+end_src
+** Lorem Ipsum
+#+begin_src emacs-lisp
+      (use-package lorem-ipsum
+        :ensure t
+        :config
+        (lorem-ipsum-use-default-bindings))
 #+end_src
 * Credential Management
 - pass to manage all passwords locally
