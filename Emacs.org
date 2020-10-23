@@ -667,14 +667,6 @@ machine api.github.com login <you-username>^forge password <token-created>
   "apg" 'password-store-generate)
 #+end_src
 * Calendar Sync
-:PROPERTIES:
-:calendar-id: kavinvalli@gmail.com
-:ETag:     "3206749245942000"
-:ID:       8efusng8vp3dtaq7l8b6elman0/kavinvalli@gmail.com
-:END:
-:org-gcal:
-<2020-10-22 Thu 21:00-22:00>
-:END:
 #+begin_src emacs-lisp
     (use-package org-gcal
          :after org
