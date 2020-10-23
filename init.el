@@ -12,17 +12,17 @@
 (require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+                           ("org" . "https://orgmode.org/elpa/")
+                           ("elpa" . "https://elpa.gnu.org/packages/")))
 
 
 (package-initialize)
 (unless package-archive-contents
-  (package-refresh-contents))
+    (package-refresh-contents))
 
 ;; Initialize use-package on non-Linux platforms
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
 
 ;; (unless (package-installed-p 'persist)
 ;;   (package-install 'persist))
@@ -31,9 +31,10 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-(use-package exec-path-from-shell
-  :init
-  (exec-path-from-shell-initialize))
+
+  (use-package exec-path-from-shell
+    :init
+    (exec-path-from-shell-initialize))
 
 (defvar runemacs/default-font-size 135)
 
@@ -502,15 +503,26 @@
   "acp" '(org-gcal-post-at-point :which-key "post"))
 
 (use-package counsel-spotify
-  :after ivy
-  :config
-  (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
-  (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
+    :after ivy
+    :config
+    (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
+    (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
 
-  (rune/leader-keys
-    "as" '(:ignore t :which-key "counsel-spotify")
-    "ass" '(counsel-spotify-search-track :which-key "search-track")
-    "asp" '(counsel-spotify-toggle-play-pause :which-key "toggle-play-pause")
-    "asa" '(counsel-spotify-search-album :which-key "search-album"))
+    (rune/leader-keys
+      "as" '(:ignore t :which-key "counsel-spotify")
+      "ass" '(counsel-spotify-search-track :which-key "search-track")
+      "asp" '(counsel-spotify-toggle-play-pause :which-key "toggle-play-pause")
+      "asa" '(counsel-spotify-search-album :which-key "search-album"))
+
+;; (use-package spotify
+;;   :config
+;;   (setq spotify-transport 'connect)
+;;   (setq spotify-oauth2-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
+;;   (setq spotify-oauth2-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret"))
+;;   (define-key spotify-mode-map (kbd "C-c .") 'spotify-command-map))
+
+(use-package ivy-youtube
+  :config
+  (setq ivy-youtube-key (password-store-get "API/Youtube/kavinvalli-emacs-api-key")))
 
 (+ 50 100)
