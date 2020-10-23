@@ -46,6 +46,8 @@
   - [[#lorem-ipsum][Lorem Ipsum]]
 - [[#credential-management][Credential Management]]
 - [[#calendar-sync][Calendar Sync]]
+- [[#music][Music]]
+  - [[#spotify][Spotify]]
 - [[#applications][Applications]]
   - [[#some-app][Some App]]
 :END:
@@ -685,8 +687,24 @@ machine api.github.com login <you-username>^forge password <token-created>
     (rune/leader-keys
       "ac" '(:ignore t :which-key "calendar")
       "acs" '(org-gcal-fetch :which-key "sync")
-      "acp" '(org-gcal-post-at-point))
+      "acp" '(org-gcal-post-at-point :which-key "post"))
 
+
+#+end_src
+* Music
+** Spotify
+#+begin_src emacs-lisp
+  (use-package counsel-spotify
+    :after ivy
+    :config
+    (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
+    (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
+
+    (rune/leader-keys
+      "as" '(:ignore t :which-key "counsel-spotify")
+      "ass" '(counsel-spotify-search-track :which-key "search-track")
+      "asp" '(counsel-spotify-toggle-play-pause :which-key "toggle-play-pause")
+      "asa" '(counsel-spotify-search-album :which-key "search-album"))
 
 #+end_src
 * Applications

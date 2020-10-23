@@ -499,6 +499,18 @@
 (rune/leader-keys
   "ac" '(:ignore t :which-key "calendar")
   "acs" '(org-gcal-fetch :which-key "sync")
-  "acp" '(org-gcal-post-at-point))
+  "acp" '(org-gcal-post-at-point :which-key "post"))
+
+(use-package counsel-spotify
+  :after ivy
+  :config
+  (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
+  (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
+
+  (rune/leader-keys
+    "as" '(:ignore t :which-key "counsel-spotify")
+    "ass" '(counsel-spotify-search-track :which-key "search-track")
+    "asp" '(counsel-spotify-toggle-play-pause :which-key "toggle-play-pause")
+    "asa" '(counsel-spotify-search-album :which-key "search-album"))
 
 (+ 50 100)
