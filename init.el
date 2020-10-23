@@ -26,11 +26,9 @@
 
 ;; (unless (package-installed-p 'persist)
 ;;   (package-install 'persist))
-(setq package-check-signature nil)
 
 (require 'use-package)
 (setq use-package-always-ensure t)
-
 
   (use-package exec-path-from-shell
     :init
@@ -82,7 +80,6 @@
 )
 (set-face-attribute 'variable-pitch nil :family "Cantarell" :height 160 :weight 'regular)
 
-;; General Setup
 (use-package general
   :config
   (general-create-definer rune/leader-keys
@@ -90,9 +87,9 @@
     :prefix "SPC"
     :global-prefix "C-SPC")
 
-  (rune/leader-keys
-    "t"  '(:ignore t :which-key "toggles")
-    "tt" '(counsel-load-theme :which-key "choose theme")))
+(defun dw/dont-arrow-me-bro ()
+  (interactive)
+  (message "Arrow keys are bad, you know?"))
 
 (use-package evil
   :init
@@ -109,6 +106,16 @@
   ;; Use visual line motions even outside of visual-line-mode buffers
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+                                        ; Disable Arrow kets in normal and visual modes
+  (define-key evil-normal-state-map (kbd "<left>") 'dw/dont-arrow-me-bro)
+  (define-key evil-normal-state-map (kbd "<right>") 'dw/dont-arrow-me-bro)
+  (define-key evil-normal-state-map (kbd "<down>") 'dw/dont-arrow-me-bro)
+  (define-key evil-normal-state-map (kbd "<up>") 'dw/dont-arrow-me-bro)
+  (evil-global-set-key 'motion (kbd "<left>") 'dw/dont-arrow-me-bro)
+  (evil-global-set-key 'motion (kbd "<right>") 'dw/dont-arrow-me-bro)
+  (evil-global-set-key 'motion (kbd "<down>") 'dw/dont-arrow-me-bro)
+  (evil-global-set-key 'motion (kbd "<up>") 'dw/dont-arrow-me-bro)
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
@@ -509,10 +516,10 @@
     (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
 
     (rune/leader-keys
-      "as" '(:ignore t :which-key "counsel-spotify")
-      "ass" '(counsel-spotify-search-track :which-key "search-track")
-      "asp" '(counsel-spotify-toggle-play-pause :which-key "toggle-play-pause")
-      "asa" '(counsel-spotify-search-album :which-key "search-album"))
+      "as" '(:ignore t :which-key "Counsel Spotify")
+      "ass" '(counsel-spotify-search-track :which-key "Search Track")
+      "asp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
+      "asa" '(counsel-spotify-search-album :which-key "Search Album"))
 
 ;; (use-package spotify
 ;;   :config
@@ -522,7 +529,9 @@
 ;;   (define-key spotify-mode-map (kbd "C-c .") 'spotify-command-map))
 
 (use-package ivy-youtube
-  :config
-  (setq ivy-youtube-key (password-store-get "API/Youtube/kavinvalli-emacs-api-key")))
+    :config
+    (setq ivy-youtube-key (password-store-get "API/Youtube/kavinvalli-emacs-api-key")))
+(rune/leader-keys
+  "y" '(ivy-youtube :which-key "Ivy Youtube"))
 
 (+ 50 100)
