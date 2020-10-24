@@ -45,6 +45,8 @@
 
 (menu-bar-mode -1)            ; Disable the menu bar
 
+(setq initial-scratch-message "Hi Kavin. C-x C-f eh" )
+
 (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
 (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
@@ -67,6 +69,7 @@
 (dolist (mode '(org-mode-hook
                 term-mode-hook
                 shell-mode-hook
+                treemacs-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -85,7 +88,7 @@
   (general-create-definer rune/leader-keys
     :keymaps '(normal insert visual emacs)
     :prefix "SPC"
-    :global-prefix "C-SPC")
+    :global-prefix "C-SPC"))
 
 (defun dw/dont-arrow-me-bro ()
   (interactive)
@@ -451,6 +454,87 @@
   :config
   (elcord-mode))
 
+(defun rune/lsp-mode-setup ()
+  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deffered)
+  :hook (lsp-mode . rune/lsp-mode-setup)
+  :init
+  (setq lsp-keymap-prefix "C-c s-p")
+  :config
+  (lsp-enable-which-key-integration t))
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-doc-position 'bottom))
+
+(use-package lsp-ivy)
+
+(use-package lsp-treemacs
+    :init (treemacs-display-current-project-exclusively)
+    :after lsp)
+
+(rune/leader-keys
+  "at" '(:ignore t :which-key "treemacs")
+  "att" 'treemacs-display-current-project-exclusively)
+
+(use-package typescript-mode
+  :mode "\\.ts\\'"
+  :hook (typescript-mode . lsp-deferred)
+  :config
+  (setq typescript-indent-level 2))
+
+(defun rune/set-js-indentation ()
+  (setq js-indent-level 2)
+  (setq evil-shift-width js-indent-level)
+  (setq-default tab-width 2))
+
+(use-package js2-mode
+  :mode "\\.js\\'"
+  :hook (js2-mode . lsp-deferred)
+  :config
+  ;; Use js2-mode for Node scripts
+  (add-to-list 'magic-mode-alist '("#!/usr/bin/env node" . js2-mode))
+
+  ;; Don't use built-in syntax checking
+  (setq js2-mode-show-strict-warnings nil)
+
+  ;; Set up proper indentation in JavaScript and JSON files
+  (add-hook 'js2-mode-hook #'rune/set-js-indentation)
+  (add-hook 'json-mode-hook #'rune/set-js-indentation))
+
+(use-package prettier-js
+  :hook ((js2-mode . prettier-js-mode)
+         (typescript-mode . prettier-js-mode))
+  :config
+  (setq prettier-js-show-errors nil))
+
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+              ("<tab>" . company-complete-selection))
+  (:map lsp-mode-map
+        ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :diminish
+  :functions (all-the-icons-faicon
+              all-the-icons-material
+              all-the-icons-octicon
+              all-the-icons-alltheicon)
+  :hook (company-mode . company-box-mode)
+  :init (setq company-box-enable-icon (display-graphic-p))
+  :config
+  (setq company-box-backends-colors nil)
+  )
+
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
@@ -519,7 +603,8 @@
       "as" '(:ignore t :which-key "Counsel Spotify")
       "ass" '(counsel-spotify-search-track :which-key "Search Track")
       "asp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
-      "asa" '(counsel-spotify-search-album :which-key "Search Album"))
+      "asa" '(counsel-spotify-search-album :which-key "Search Album")
+      "as>" '(counsel-spotify-next :which-key "Next"))
 
 ;; (use-package spotify
 ;;   :config

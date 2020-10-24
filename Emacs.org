@@ -1,6 +1,5 @@
 #+TITLE: Emacs Scratch Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
-
 * Table of Contents
 :PROPERTIES:
 :TOC:      :include all :ignore this
@@ -42,6 +41,16 @@
   - [[#counsel-osx-app][Counsel OSX App]]
   - [[#elcord-discord][Elcord (Discord)]]
 - [[#development][Development]]
+  - [[#languages][Languages]]
+    - [[#language-server][Language Server]]
+      - [[#basic-setup][Basic Setup]]
+      - [[#lsp-ui][LSP UI]]
+      - [[#lsp-ivy][LSP IVY]]
+      - [[#lsp-treemacs][LSP Treemacs]]
+    - [[#programming-languages][Programming Languages]]
+      - [[#typescript][TypeScript]]
+      - [[#javascript][JavaScript]]
+  - [[#company-mode][Company Mode]]
   - [[#projectile][Projectile]]
   - [[#magit][Magit]]
     - [[#configuration][Configuration]]
@@ -110,6 +119,8 @@
 
   (menu-bar-mode -1)            ; Disable the menu bar
 
+  (setq initial-scratch-message "Hi Kavin. C-x C-f eh" )
+
   (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
   (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
   (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
@@ -132,6 +143,7 @@
   (dolist (mode '(org-mode-hook
                   term-mode-hook
                   shell-mode-hook
+                  treemacs-mode-hook
                   eshell-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -158,7 +170,7 @@
     (general-create-definer rune/leader-keys
       :keymaps '(normal insert visual emacs)
       :prefix "SPC"
-      :global-prefix "C-SPC")
+      :global-prefix "C-SPC"))
 #+end_src
 ** Let's be Evil
 #+begin_src emacs-lisp
@@ -607,6 +619,116 @@ For showing =Playing Emacs= inside Discord
   (elcord-mode))
 #+end_src
 * Development
+** Languages
+*** Language Server
+**** Basic Setup
+#+begin_src emacs-lisp
+
+  (defun rune/lsp-mode-setup ()
+    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode))
+
+  (use-package lsp-mode
+    :commands (lsp lsp-deffered)
+    :hook (lsp-mode . rune/lsp-mode-setup)
+    :init
+    (setq lsp-keymap-prefix "C-c s-p")
+    :config
+    (lsp-enable-which-key-integration t))
+
+#+end_src
+**** LSP UI
+#+begin_src emacs-lisp
+
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :custom
+    (lsp-ui-doc-position 'bottom))
+
+#+end_src
+**** LSP IVY
+#+begin_src emacs-lisp
+
+  (use-package lsp-ivy)
+
+#+end_src
+**** LSP Treemacs
+#+begin_src emacs-lisp
+    (use-package lsp-treemacs
+      :init (treemacs-display-current-project-exclusively)
+      :after lsp)
+
+  (rune/leader-keys
+    "at" '(:ignore t :which-key "treemacs")
+    "att" 'treemacs-display-current-project-exclusively)
+
+#+end_src
+*** Programming Languages
+**** TypeScript
+#+begin_src emacs-lisp
+
+  (use-package typescript-mode
+    :mode "\\.ts\\'"
+    :hook (typescript-mode . lsp-deferred)
+    :config
+    (setq typescript-indent-level 2))
+
+#+end_src
+
+**** JavaScript
+#+begin_src emacs-lisp
+  (defun rune/set-js-indentation ()
+    (setq js-indent-level 2)
+    (setq evil-shift-width js-indent-level)
+    (setq-default tab-width 2))
+
+  (use-package js2-mode
+    :mode "\\.js\\'"
+    :hook (js2-mode . lsp-deferred)
+    :config
+    ;; Use js2-mode for Node scripts
+    (add-to-list 'magic-mode-alist '("#!/usr/bin/env node" . js2-mode))
+
+    ;; Don't use built-in syntax checking
+    (setq js2-mode-show-strict-warnings nil)
+
+    ;; Set up proper indentation in JavaScript and JSON files
+    (add-hook 'js2-mode-hook #'rune/set-js-indentation)
+    (add-hook 'json-mode-hook #'rune/set-js-indentation))
+
+  (use-package prettier-js
+    :hook ((js2-mode . prettier-js-mode)
+           (typescript-mode . prettier-js-mode))
+    :config
+    (setq prettier-js-show-errors nil))
+#+end_src
+
+** Company Mode
+#+begin_src emacs-lisp
+
+  (use-package company
+    :after lsp-mode
+    :hook (lsp-mode . company-mode)
+    :bind (:map company-active-map
+                ("<tab>" . company-complete-selection))
+    (:map lsp-mode-map
+          ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0))
+
+  (use-package company-box
+    :diminish
+    :functions (all-the-icons-faicon
+                all-the-icons-material
+                all-the-icons-octicon
+                all-the-icons-alltheicon)
+    :hook (company-mode . company-box-mode)
+    :init (setq company-box-enable-icon (display-graphic-p))
+    :config
+    (setq company-box-backends-colors nil)
+    )
+#+end_src
 ** Projectile
 #+begin_src emacs-lisp
 
@@ -699,24 +821,25 @@ machine api.github.com login <you-username>^forge password <token-created>
 * Music
 ** Spotify
 #+begin_src emacs-lisp
-    (use-package counsel-spotify
-      :after ivy
-      :config
-      (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
-      (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
+      (use-package counsel-spotify
+        :after ivy
+        :config
+        (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
+        (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
 
-      (rune/leader-keys
-        "as" '(:ignore t :which-key "Counsel Spotify")
-        "ass" '(counsel-spotify-search-track :which-key "Search Track")
-        "asp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
-        "asa" '(counsel-spotify-search-album :which-key "Search Album"))
+        (rune/leader-keys
+          "as" '(:ignore t :which-key "Counsel Spotify")
+          "ass" '(counsel-spotify-search-track :which-key "Search Track")
+          "asp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
+          "asa" '(counsel-spotify-search-album :which-key "Search Album")
+          "as>" '(counsel-spotify-next :which-key "Next"))
 
-  ;; (use-package spotify
-  ;;   :config
-  ;;   (setq spotify-transport 'connect)
-  ;;   (setq spotify-oauth2-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
-  ;;   (setq spotify-oauth2-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret"))
-  ;;   (define-key spotify-mode-map (kbd "C-c .") 'spotify-command-map))
+    ;; (use-package spotify
+    ;;   :config
+    ;;   (setq spotify-transport 'connect)
+    ;;   (setq spotify-oauth2-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
+    ;;   (setq spotify-oauth2-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret"))
+    ;;   (define-key spotify-mode-map (kbd "C-c .") 'spotify-command-map))
 
 #+end_src
 * Youtube
