@@ -15,17 +15,12 @@
                            ("org" . "https://orgmode.org/elpa/")
                            ("elpa" . "https://elpa.gnu.org/packages/")))
 
-
 (package-initialize)
 (unless package-archive-contents
     (package-refresh-contents))
 
-;; Initialize use-package on non-Linux platforms
-  (unless (package-installed-p 'use-package)
-    (package-install 'use-package))
-
-;; (unless (package-installed-p 'persist)
-;;   (package-install 'persist))
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
 
 (require 'use-package)
 (setq use-package-always-ensure t)
@@ -33,8 +28,6 @@
   (use-package exec-path-from-shell
     :init
     (exec-path-from-shell-initialize))
-
-(defvar runemacs/default-font-size 135)
 
 (setq inhibit-startup-message t)
 
@@ -45,22 +38,28 @@
 
 (menu-bar-mode -1)            ; Disable the menu bar
 
-(setq initial-scratch-message "Hi Kavin. C-x C-f eh" )
+(setq initial-scratch-message "Hi Kavin. C-x C-f eh" ) ; Message on Scratch Buffer
 
+;; Configure Transparency in Emacs Window
 (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
 (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+;; Configure Emacs Window to be fullscreen
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 ;; Set up the visible bell
-(setq visible-bell nil
-      ring-bell-function 'double-flash-mode-line)
-(defun double-flash-mode-line ()
-  (let ((flash-sec (/ 1.0 20)))
-    (invert-face 'mode-line)
-    (run-with-timer flash-sec nil #'invert-face 'mode-line)
-    (run-with-timer (* 2 flash-sec) nil #'invert-face 'mode-line)
-    (run-with-timer (* 3 flash-sec) nil #'invert-face 'mode-line)))
+(when (equal system-name "Kavins-Air.Dlink")
+  (setq visible-bell nil
+        ring-bell-function 'double-flash-mode-line)
+  (defun double-flash-mode-line ()
+    (let ((flash-sec (/ 1.0 20)))
+      (invert-face 'mode-line)
+      (run-with-timer flash-sec nil #'invert-face 'mode-line)
+      (run-with-timer (* 2 flash-sec) nil #'invert-face 'mode-line)
+      (run-with-timer (* 3 flash-sec) nil #'invert-face 'mode-line))))
+
+(when (equal system-name "kavin-pc")
+  (setq visible-bell t))
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
@@ -73,6 +72,8 @@
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+(defvar runemacs/default-font-size 135)
+
 (when (equal system-name "Kavins-Air.Dlink")
     (set-face-attribute 'default nil :font "MesloLGS NF" :height runemacs/default-font-size)
     (set-face-attribute 'fixed-pitch nil :font "MesloLGS NF" :height 140)
@@ -82,6 +83,18 @@
     (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 140)
 )
 (set-face-attribute 'variable-pitch nil :family "Cantarell" :height 160 :weight 'regular)
+
+(use-package all-the-icons)
+
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :custom ((doom-modeline-height 15)))
+
+(use-package doom-themes
+  :init (load-theme 'doom-dracula t))
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package general
   :config
@@ -132,7 +145,6 @@
 
 (use-package command-log-mode)
 
-;; Ivu Configuration
 (use-package ivy
   :diminish
   :bind (("C-s" . swiper)
@@ -151,24 +163,6 @@
   :config
   (ivy-mode 1))
 
-(use-package all-the-icons)
-
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
-
-(use-package doom-themes
-  :init (load-theme 'doom-dracula t))
-
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
-
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
-
 (use-package ivy-rich
   :init
   (ivy-rich-mode 1))
@@ -177,9 +171,15 @@
   :bind (("M-x" . counsel-M-x)
          ("C-x b" . counsel-ibuffer)
          ("C-x C-f" . counsel-find-file)
-	 ("C-M-j" . counsel-switch-buffer)
+         ("C-M-j" . counsel-switch-buffer)
          :map minibuffer-local-map
          ("C-r" . 'counsel-minibuffer-history)))
+
+(use-package which-key
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 1))
 
 (use-package helpful
   :custom
@@ -396,7 +396,7 @@
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))(defun efs/org-mode-visual-fill ()
   (setq visual-fill-column-width 100
-	visual-fill-column-center-text t)
+        visual-fill-column-center-text t)
   (visual-fill-column-mode 1))
 
 (org-babel-do-load-languages
@@ -570,8 +570,7 @@
   :hook (company-mode . company-box-mode)
   :init (setq company-box-enable-icon (display-graphic-p))
   :config
-  (setq company-box-backends-colors nil)
-  )
+  (setq company-box-backends-colors nil))
 
 (use-package projectile
   :diminish projectile-mode
@@ -656,5 +655,7 @@
     (setq ivy-youtube-key (password-store-get "API/Youtube/kavinvalli-emacs-api-key")))
 (rune/leader-keys
   "y" '(ivy-youtube :which-key "Ivy Youtube"))
+
+;; (use-package cricbuzz)
 
 (+ 50 100)

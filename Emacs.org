@@ -8,13 +8,20 @@
 - [[#startup-performance][Startup Performance]]
 - [[#package-system-setup][Package System Setup]]
 - [[#basic-ui-configuration][Basic UI Configuration]]
+  - [[#setup][Setup]]
   - [[#font-configuration][Font Configuration]]
+  - [[#icons][Icons]]
+  - [[#modeline][Modeline]]
+  - [[#theme][Theme]]
+  - [[#rainbow-delimiter][Rainbow Delimiter]]
 - [[#keybinding-configuration][Keybinding Configuration]]
   - [[#general][General]]
   - [[#lets-be-evil][Let's be Evil]]
 - [[#editing-configuration][Editing Configuration]]
   - [[#command-log-mode][Command Log Mode]]
   - [[#ivy-and-counsel][Ivy and Counsel]]
+  - [[#counsel][Counsel]]
+  - [[#which-key][Which-key]]
   - [[#helpful-help-commands][Helpful Help Commands]]
   - [[#productivity][Productivity]]
     - [[#autopair-config][Autopair Config]]
@@ -36,7 +43,7 @@
   - [[#table-of-contents][Table of Contents]]
   - [[#create-template][Create Template]]
   - [[#auto-tangle-configuration-files][Auto-tangle Configuration Files]]
-  - [[#org-wild-notifier-check][Org-wild-notifier-check]]
+  - [[#org-alert][Org-alert]]
 - [[#utilities][Utilities]]
   - [[#counsel-osx-app][Counsel OSX App]]
   - [[#elcord-discord][Elcord (Discord)]]
@@ -64,10 +71,12 @@
 - [[#music][Music]]
   - [[#spotify][Spotify]]
 - [[#youtube][Youtube]]
+- [[#cricket][Cricket]]
 - [[#applications][Applications]]
   - [[#some-app][Some App]]
 :END:
 * Startup Performance
+Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-performance][David Wilson's emacs configuration]]
 #+begin_src emacs-lisp
 (setq gc-cons-threshold (* 50 1000 1000))
 
@@ -81,6 +90,8 @@
                      gcs-done)))
 #+end_src
 * Package System Setup
+- Using MELPA, ELPA, and Org package repositories
+- =use-package= setup
 #+begin_src emacs-lisp
   (require 'package)
 
@@ -88,17 +99,12 @@
                              ("org" . "https://orgmode.org/elpa/")
                              ("elpa" . "https://elpa.gnu.org/packages/")))
 
-
   (package-initialize)
   (unless package-archive-contents
       (package-refresh-contents))
 
-  ;; Initialize use-package on non-Linux platforms
-    (unless (package-installed-p 'use-package)
-      (package-install 'use-package))
-
-  ;; (unless (package-installed-p 'persist)
-  ;;   (package-install 'persist))
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
 
   (require 'use-package)
   (setq use-package-always-ensure t)
@@ -109,10 +115,9 @@
 
 #+end_src
 * Basic UI Configuration
+** Setup
 
 #+begin_src emacs-lisp
-
-  (defvar runemacs/default-font-size 135)
 
   (setq inhibit-startup-message t)
 
@@ -123,22 +128,28 @@
 
   (menu-bar-mode -1)            ; Disable the menu bar
 
-  (setq initial-scratch-message "Hi Kavin. C-x C-f eh" )
+  (setq initial-scratch-message "Hi Kavin. C-x C-f eh" ) ; Message on Scratch Buffer
 
+  ;; Configure Transparency in Emacs Window
   (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
   (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+  ;; Configure Emacs Window to be fullscreen
   (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
   (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
   ;; Set up the visible bell
-  (setq visible-bell nil
-        ring-bell-function 'double-flash-mode-line)
-  (defun double-flash-mode-line ()
-    (let ((flash-sec (/ 1.0 20)))
-      (invert-face 'mode-line)
-      (run-with-timer flash-sec nil #'invert-face 'mode-line)
-      (run-with-timer (* 2 flash-sec) nil #'invert-face 'mode-line)
-      (run-with-timer (* 3 flash-sec) nil #'invert-face 'mode-line)))
+  (when (equal system-name "Kavins-Air.Dlink")
+    (setq visible-bell nil
+          ring-bell-function 'double-flash-mode-line)
+    (defun double-flash-mode-line ()
+      (let ((flash-sec (/ 1.0 20)))
+        (invert-face 'mode-line)
+        (run-with-timer flash-sec nil #'invert-face 'mode-line)
+        (run-with-timer (* 2 flash-sec) nil #'invert-face 'mode-line)
+        (run-with-timer (* 3 flash-sec) nil #'invert-face 'mode-line))))
+
+  (when (equal system-name "kavin-pc")
+    (setq visible-bell t))
 
   (column-number-mode)
   (global-display-line-numbers-mode t)
@@ -155,17 +166,49 @@
 
 ** Font Configuration
 #+begin_src emacs-lisp
-(when (equal system-name "Kavins-Air.Dlink")
-    (set-face-attribute 'default nil :font "MesloLGS NF" :height runemacs/default-font-size)
-    (set-face-attribute 'fixed-pitch nil :font "MesloLGS NF" :height 140)
-)
-(when (equal system-name "kavin-pc")
-    (set-face-attribute 'default nil :font "Fira Code Retina" :height runemacs/default-font-size)
-    (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 140)
-)
-(set-face-attribute 'variable-pitch nil :family "Cantarell" :height 160 :weight 'regular)
+
+  (defvar runemacs/default-font-size 135)
+
+  (when (equal system-name "Kavins-Air.Dlink")
+      (set-face-attribute 'default nil :font "MesloLGS NF" :height runemacs/default-font-size)
+      (set-face-attribute 'fixed-pitch nil :font "MesloLGS NF" :height 140)
+  )
+  (when (equal system-name "kavin-pc")
+      (set-face-attribute 'default nil :font "Fira Code Retina" :height runemacs/default-font-size)
+      (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 140)
+  )
+  (set-face-attribute 'variable-pitch nil :family "Cantarell" :height 160 :weight 'regular)
+
 #+end_src
 
+** Icons
+#+begin_src emacs-lisp
+
+  (use-package all-the-icons)
+
+#+end_src
+** Modeline
+#+begin_src emacs-lisp
+
+  (use-package doom-modeline
+    :init (doom-modeline-mode 1)
+    :custom ((doom-modeline-height 15)))
+
+#+end_src
+** Theme
+#+begin_src emacs-lisp
+
+  (use-package doom-themes
+    :init (load-theme 'doom-dracula t))
+
+#+end_src
+** Rainbow Delimiter
+#+begin_src emacs-lisp
+
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
+
+#+end_src
 * Keybinding Configuration
 ** General
 #+begin_src emacs-lisp
@@ -228,55 +271,50 @@
 #+end_src
 ** Ivy and Counsel
 #+begin_src emacs-lisp
-;; Ivu Configuration
-(use-package ivy
-  :diminish
-  :bind (("C-s" . swiper)
-         :map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)
-         ("C-l" . ivy-alt-done)
-         ("C-j" . ivy-next-line)
-         ("C-k" . ivy-previous-line)
-         :map ivy-switch-buffer-map
-         ("C-k" . ivy-previous-line)
-         ("C-l" . ivy-done)
-         ("C-d" . ivy-switch-buffer-kill)
-         :map ivy-reverse-i-search-map
-         ("C-k" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
-  :config
-  (ivy-mode 1))
 
-(use-package all-the-icons)
+  (use-package ivy
+    :diminish
+    :bind (("C-s" . swiper)
+           :map ivy-minibuffer-map
+           ("TAB" . ivy-alt-done)
+           ("C-l" . ivy-alt-done)
+           ("C-j" . ivy-next-line)
+           ("C-k" . ivy-previous-line)
+           :map ivy-switch-buffer-map
+           ("C-k" . ivy-previous-line)
+           ("C-l" . ivy-done)
+           ("C-d" . ivy-switch-buffer-kill)
+           :map ivy-reverse-i-search-map
+           ("C-k" . ivy-previous-line)
+           ("C-d" . ivy-reverse-i-search-kill))
+    :config
+    (ivy-mode 1))
 
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
+  (use-package ivy-rich
+    :init
+    (ivy-rich-mode 1))
 
-(use-package doom-themes
-  :init (load-theme 'doom-dracula t))
+#+end_src
+** Counsel
+#+begin_src emacs-lisp
 
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  (use-package counsel
+    :bind (("M-x" . counsel-M-x)
+           ("C-x b" . counsel-ibuffer)
+           ("C-x C-f" . counsel-find-file)
+           ("C-M-j" . counsel-switch-buffer)
+           :map minibuffer-local-map
+           ("C-r" . 'counsel-minibuffer-history)))
 
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
+#+end_src
+** Which-key
+#+begin_src emacs-lisp
 
-(use-package ivy-rich
-  :init
-  (ivy-rich-mode 1))
-
-(use-package counsel
-  :bind (("M-x" . counsel-M-x)
-         ("C-x b" . counsel-ibuffer)
-         ("C-x C-f" . counsel-find-file)
-	 ("C-M-j" . counsel-switch-buffer)
-         :map minibuffer-local-map
-         ("C-r" . 'counsel-minibuffer-history)))
-
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+    (setq which-key-idle-delay 1))
 
 #+end_src
 ** Helpful Help Commands
@@ -296,8 +334,8 @@
 ** Productivity
 *** Autopair Config
 #+begin_src emacs-lisp
-(use-package autopair)
-(autopair-global-mode)
+  (use-package autopair)
+  (autopair-global-mode)
 #+end_src
 *** Emmet Mode
 #+begin_src emacs-lisp
@@ -321,13 +359,13 @@
 #+end_src
 *** Yasnippet
 #+begin_src emacs-lisp
-(use-package yasnippet
-  :init
-  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-  :config
-  (yas-global-mode))
+  (use-package yasnippet
+    :init
+    (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+    :config
+    (yas-global-mode))
 
-(provide 'init-yasnippet)
+  (provide 'init-yasnippet)
 #+end_src
 ** Commenting Lines
 #+begin_src emacs-lisp
@@ -337,91 +375,91 @@
 ** Text Scaling
 #+begin_src emacs-lisp
 
-(use-package hydra)
+  (use-package hydra)
 
-(defhydra hydra-text-scale (:timeout 4)
-  "scale text"
-  ("j" text-scale-increase "in")
-  ("k" text-scale-decrease "out")
-  ("f" nil "finished" :exit t))
+  (defhydra hydra-text-scale (:timeout 4)
+    "scale text"
+    ("j" text-scale-increase "in")
+    ("k" text-scale-decrease "out")
+    ("f" nil "finished" :exit t))
 
-(rune/leader-keys
-  "ts" '(hydra-text-scale/body :which-key "scale text"))
+  (rune/leader-keys
+    "ts" '(hydra-text-scale/body :which-key "scale text"))
 
 #+end_src
 * Org Mode
 ** Basic Config
 *** Setup
 #+begin_src emacs-lisp
-(defun efs/org-mode-setup ()
-  (org-indent-mode)
-  (variable-pitch-mode 1)
-  (visual-line-mode 1))
+  (defun efs/org-mode-setup ()
+    (org-indent-mode)
+    (variable-pitch-mode 1)
+    (visual-line-mode 1))
 
-(use-package org-bullets
-  :after org
-  :hook (org-mode . org-bullets-mode)
-  :custom
-  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+  (use-package org-bullets
+    :after org
+    :hook (org-mode . org-bullets-mode)
+    :custom
+    (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
 #+end_src
 *** Font Configuration
 #+begin_src emacs-lisp
-(defun efs/org-font-setup ()
-  ;; Replace list hyphen with dot
-  (font-lock-add-keywords 'org-mode
-                          '(("^ *\\([-]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+  (defun efs/org-font-setup ()
+    ;; Replace list hyphen with dot
+    (font-lock-add-keywords 'org-mode
+                            '(("^ *\\([-]\\) "
+                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
-  ;; Set faces for heading levels
-  (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1)))
-    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+    ;; Set faces for heading levels
+    (dolist (face '((org-level-1 . 1.2)
+                    (org-level-2 . 1.1)
+                    (org-level-3 . 1.05)
+                    (org-level-4 . 1.0)
+                    (org-level-5 . 1.1)
+                    (org-level-6 . 1.1)
+                    (org-level-7 . 1.1)
+                    (org-level-8 . 1.1)))
+      (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
 
-  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+    ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+    (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
 #+end_src
 *** Use Org
 #+begin_src emacs-lisp
-    (use-package org
-      :hook (org-mode . efs/org-mode-setup)
-      :ensure org-plus-contrib
-      :config
-      (setq org-ellipsis " ▾")
+  (use-package org
+    :hook (org-mode . efs/org-mode-setup)
+    :ensure org-plus-contrib
+    :config
+    (setq org-ellipsis " ▾")
 
-      (setq org-agenda-start-with-log-mode t)
-      (setq org-log-done 'time)
-      (setq org-log-into-drawer t)
+    (setq org-agenda-start-with-log-mode t)
+    (setq org-log-done 'time)
+    (setq org-log-into-drawer t)
 
-      (setq org-agenda-files
-            '("~/Notes/Tasks.org"
-              "~/Notes/Birthdays.org"
-              "~/Notes/Calendar.org"))
+    (setq org-agenda-files
+          '("~/Notes/Tasks.org"
+            "~/Notes/Birthdays.org"
+            "~/Notes/Calendar.org"))
 
-      (setq org-refile-targets
-        '(("Archive.org" :maxlevel . 1)
-          ("Tasks.org" :maxlevel . 1)))
+    (setq org-refile-targets
+      '(("Archive.org" :maxlevel . 1)
+        ("Tasks.org" :maxlevel . 1)))
 
-      (advice-add 'org-refile :after 'org-save-all-org-buffers)
+    (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-      (setq org-todo-keywords
-            '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-              (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+    (setq org-todo-keywords
+          '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+            (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
 
-      (efs/org-font-setup))
+    (efs/org-font-setup))
 
 #+end_src
 *** Tag List
@@ -497,71 +535,71 @@
 #+end_src
 *** Capture Templates
 #+begin_src emacs-lisp
-(setq org-capture-templates
-    `(("t" "Tasks / Projects")
-      ("tt" "Task" entry (file+olp "~/Notes/Tasks.org" "Inbox")
-           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+  (setq org-capture-templates
+      `(("t" "Tasks / Projects")
+        ("tt" "Task" entry (file+olp "~/Notes/Tasks.org" "Inbox")
+             "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
-      ("j" "Journal Entries")
-      ("jj" "Journal" entry
-           (file+olp+datetree "~/Notes/Journal.org")
-           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-           ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-           :clock-in :clock-resume
-           :empty-lines 1)
-      ("jm" "Meeting" entry
-           (file+olp+datetree "~/Notes/Journal.org")
-           "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-           :clock-in :clock-resume
-           :empty-lines 1)
+        ("j" "Journal Entries")
+        ("jj" "Journal" entry
+             (file+olp+datetree "~/Notes/Journal.org")
+             "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+             ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+             :clock-in :clock-resume
+             :empty-lines 1)
+        ("jm" "Meeting" entry
+             (file+olp+datetree "~/Notes/Journal.org")
+             "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
+             :clock-in :clock-resume
+             :empty-lines 1)
 
-      ("w" "Workflows")
-      ("we" "Checking Email" entry (file+olp+datetree "~/Notes/Journal.org")
-           "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)))
+        ("w" "Workflows")
+        ("we" "Checking Email" entry (file+olp+datetree "~/Notes/Journal.org")
+             "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)))
 
-(define-key global-map (kbd "C-c j")
-  (lambda () (interactive) (org-capture nil "jj")))
+  (define-key global-map (kbd "C-c j")
+    (lambda () (interactive) (org-capture nil "jj")))
 
 
 #+end_src
 *** Org mode UI
 #+begin_src emacs-lisp
 
-(defun efs/org-mode-visual-fill ()
-  (setq visual-fill-column-width 100
-        visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
+  (defun efs/org-mode-visual-fill ()
+    (setq visual-fill-column-width 100
+          visual-fill-column-center-text t)
+    (visual-fill-column-mode 1))
 
-(use-package visual-fill-column
-  :hook (org-mode . efs/org-mode-visual-fill))(defun efs/org-mode-visual-fill ()
-  (setq visual-fill-column-width 100
-	visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
+  (use-package visual-fill-column
+    :hook (org-mode . efs/org-mode-visual-fill))(defun efs/org-mode-visual-fill ()
+    (setq visual-fill-column-width 100
+          visual-fill-column-center-text t)
+    (visual-fill-column-mode 1))
 
 #+end_src
 ** Configure Babel Languages
 
 #+begin_src emacs-lisp
 
-(org-babel-do-load-languages
-    'org-babel-load-languages
-    '((emacs-lisp . t)
-        (python . t)))
+  (org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t)
+          (python . t)))
 
-(push '("conf-unix" . counf-unix) org-src-lang-modes)
+  (push '("conf-unix" . counf-unix) org-src-lang-modes)
 
 #+end_src
 
 ** Org Special Block
 #+begin_src emacs-lisp
-(use-package org-special-block-extras
-  :ensure t
-  :hook (org-mode . org-special-block-extras-mode))
+  (use-package org-special-block-extras
+    :ensure t
+    :hook (org-mode . org-special-block-extras-mode))
 #+end_src
 ** Table of Contents
 #+begin_src emacs-lisp
-(use-package org-make-toc
-  :hook (org-mode . org-make-toc-mode))
+  (use-package org-make-toc
+    :hook (org-mode . org-make-toc-mode))
 #+end_src
 ** Create Template
 #+begin_src emacs-lisp
@@ -576,16 +614,16 @@
 ** Auto-tangle Configuration Files
 #+begin_src emacs-lisp
 
-(defun efs/org-babel-tangle-config ()
-       (when (string-equal (buffer-file-name)
-                           (expand-file-name "~/.emacs.d/Emacs.org"))
-        (let ((org-confirm-babel-evaluate nil))
-           (org-babel-tangle))))
+  (defun efs/org-babel-tangle-config ()
+         (when (string-equal (buffer-file-name)
+                             (expand-file-name "~/.emacs.d/Emacs.org"))
+          (let ((org-confirm-babel-evaluate nil))
+             (org-babel-tangle))))
 
-(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
+  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 #+end_src
 
-** Org-wild-notifier-check
+** Org-alert
 #+begin_src emacs-lisp
 
   (use-package org-alert
@@ -780,25 +818,24 @@ For showing =Playing Emacs= inside Discord
     :hook (company-mode . company-box-mode)
     :init (setq company-box-enable-icon (display-graphic-p))
     :config
-    (setq company-box-backends-colors nil)
-    )
+    (setq company-box-backends-colors nil))
 #+end_src
 ** Projectile
 #+begin_src emacs-lisp
 
-(use-package projectile
-  :diminish projectile-mode
-  :config (projectile-mode)
-  :custom ((projectile-completion-system 'ivy))
-  :bind-keymap
-  ("C-c p" . projectile-command-map)
-  :init
-  (when (file-directory-p "~/Documents/projects")
-    (setq projectile-project-search-path '("~/Documents/projects")))
-  (setq projectile-switch-project-action #'projectile-dired))
+  (use-package projectile
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom ((projectile-completion-system 'ivy))
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :init
+    (when (file-directory-p "~/Documents/projects")
+      (setq projectile-project-search-path '("~/Documents/projects")))
+    (setq projectile-switch-project-action #'projectile-dired))
 
-(use-package counsel-projectile
-  :config (counsel-projectile-mode))
+  (use-package counsel-projectile
+    :config (counsel-projectile-mode))
 
 #+end_src
 ** Magit
@@ -807,7 +844,7 @@ Befor using Forge, remember to do the following
 - Create a personal access token in [[https://github.com/settings/tokens][Personal Access Tokens tab]]
 - In your device run
 #+begin_src sh
-vi ~/.authinfo
+  vi ~/.authinfo
 #+end_src
 - Add the following
 #+begin_src
@@ -830,70 +867,70 @@ machine api.github.com login <you-username>^forge password <token-created>
 #+end_src
 ** Lorem Ipsum
 #+begin_src emacs-lisp
-      (use-package lorem-ipsum
-        :ensure t
-        :config
-        (lorem-ipsum-use-default-bindings))
+  (use-package lorem-ipsum
+    :ensure t
+    :config
+    (lorem-ipsum-use-default-bindings))
 #+end_src
 * Credential Management
 - pass to manage all passwords locally
 - ivy-pass to make managing passwords easier in Emacs
 - auth-source-pass to store passwords in one place
 #+begin_src emacs-lisp
-(use-package ivy-pass
-  :commands ivy-pass
-  :config
-  (setq password-store-password-length 12))
+  (use-package ivy-pass
+    :commands ivy-pass
+    :config
+    (setq password-store-password-length 12))
 
-(use-package auth-source-pass
-  :config
-  (auth-source-pass-enable))
+  (use-package auth-source-pass
+    :config
+    (auth-source-pass-enable))
 
-(rune/leader-keys
-  "ap" '(:ignore t :which-key "pass")
-  "app" 'ivy-pass
-  "api" 'password-store-insert
-  "apg" 'password-store-generate)
+  (rune/leader-keys
+    "ap" '(:ignore t :which-key "pass")
+    "app" 'ivy-pass
+    "api" 'password-store-insert
+    "apg" 'password-store-generate)
 #+end_src
 * Calendar Sync
 #+begin_src emacs-lisp
-    (use-package org-gcal
-         :after org
-         :config
+  (use-package org-gcal
+       :after org
+       :config
 
-         (setq org-gcal-client-id (password-store-get "API/Google/kavinvalli-emacs-id")
-               org-gcal-client-secret (password-store-get "API/Google/kavinvalli-emacs-secret")
-               org-gcal-file-alist '(("kavinvalli@gmail.com" . "~/Notes/Calendar.org"))))
+       (setq org-gcal-client-id (password-store-get "API/Google/kavinvalli-emacs-id")
+             org-gcal-client-secret (password-store-get "API/Google/kavinvalli-emacs-secret")
+             org-gcal-file-alist '(("kavinvalli@gmail.com" . "~/Notes/Calendar.org"))))
 
-    (rune/leader-keys
-      "ac" '(:ignore t :which-key "calendar")
-      "acs" '(org-gcal-fetch :which-key "sync")
-      "acp" '(org-gcal-post-at-point :which-key "post"))
+  (rune/leader-keys
+    "ac" '(:ignore t :which-key "calendar")
+    "acs" '(org-gcal-fetch :which-key "sync")
+    "acp" '(org-gcal-post-at-point :which-key "post"))
 
 
 #+end_src
 * Music
 ** Spotify
 #+begin_src emacs-lisp
-      (use-package counsel-spotify
-        :after ivy
-        :config
-        (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
-        (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
+  (use-package counsel-spotify
+      :after ivy
+      :config
+      (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
+      (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
 
-        (rune/leader-keys
-          "as" '(:ignore t :which-key "Counsel Spotify")
-          "ass" '(counsel-spotify-search-track :which-key "Search Track")
-          "asp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
-          "asa" '(counsel-spotify-search-album :which-key "Search Album")
-          "as>" '(counsel-spotify-next :which-key "Next"))
+      (rune/leader-keys
+        "as" '(:ignore t :which-key "Counsel Spotify")
+        "ass" '(counsel-spotify-search-track :which-key "Search Track")
+        "asp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
+        "asa" '(counsel-spotify-search-album :which-key "Search Album")
+        "as>" '(counsel-spotify-next :which-key "Next"))
 
-    ;; (use-package spotify
-    ;;   :config
-    ;;   (setq spotify-transport 'connect)
-    ;;   (setq spotify-oauth2-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
-    ;;   (setq spotify-oauth2-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret"))
-    ;;   (define-key spotify-mode-map (kbd "C-c .") 'spotify-command-map))
+  ;; (use-package spotify
+  ;;   :config
+  ;;   (setq spotify-transport 'connect)
+  ;;   (setq spotify-oauth2-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
+  ;;   (setq spotify-oauth2-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret"))
+  ;;   (define-key spotify-mode-map (kbd "C-c .") 'spotify-command-map))
 
 #+end_src
 * Youtube
@@ -903,6 +940,10 @@ machine api.github.com login <you-username>^forge password <token-created>
         (setq ivy-youtube-key (password-store-get "API/Youtube/kavinvalli-emacs-api-key")))
     (rune/leader-keys
       "y" '(ivy-youtube :which-key "Ivy Youtube"))
+#+end_src
+* Cricket
+#+begin_src emacs-lisp
+  ;; (use-package cricbuzz)
 #+end_src
 * Applications
 ** Some App
