@@ -52,6 +52,7 @@
       - [[#javascript][JavaScript]]
       - [[#html][HTML]]
       - [[#css][CSS]]
+      - [[#scss][SCSS]]
   - [[#company-mode][Company Mode]]
   - [[#projectile][Projectile]]
   - [[#magit][Magit]]
@@ -732,6 +733,17 @@ For showing =Playing Emacs= inside Discord
     :hook (css-mode . lsp-deferred)
     :config
     (setq css-indent-offset 2))
+
+#+end_src
+**** SCSS
+#+begin_src emacs-lisp
+
+        (use-package scss-mode
+          :mode "\\.scss\\'"
+          :hook (scss-mode . lsp-deferred)
+          :config
+          (setq scss-output-directory "../css")
+          (setq scss-compile-at-save t))
 
 #+end_src
 ** Company Mode

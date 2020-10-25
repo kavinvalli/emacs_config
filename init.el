@@ -535,6 +535,13 @@
   :config
   (setq css-indent-offset 2))
 
+(use-package scss-mode
+  :mode "\\.scss\\'"
+  :hook (scss-mode . lsp-deferred)
+  :config
+  (setq scss-output-directory "../css")
+  (setq scss-compile-at-save t))
+
 (use-package company
   :after lsp-mode
   :hook (lsp-mode . company-mode)
