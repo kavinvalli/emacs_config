@@ -53,6 +53,7 @@
       - [[#html][HTML]]
       - [[#css][CSS]]
       - [[#scss][SCSS]]
+      - [[#python][Python]]
   - [[#company-mode][Company Mode]]
   - [[#projectile][Projectile]]
   - [[#magit][Magit]]
@@ -627,18 +628,19 @@ For showing =Playing Emacs= inside Discord
 **** Basic Setup
 #+begin_src emacs-lisp
 
-  (defun rune/lsp-mode-setup ()
-    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-    (lsp-headerline-breadcrumb-mode))
+    (defun rune/lsp-mode-setup ()
+      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+      (lsp-headerline-breadcrumb-mode)
+      (lsp))
 
-  (use-package lsp-mode
-    :ensure t
-    :commands (lsp lsp-deffered)
-    :hook (lsp-mode . rune/lsp-mode-setup)
-    :init
-    (setq lsp-keymap-prefix "C-c s-p")
-    :config
-    (lsp-enable-which-key-integration t))
+    (use-package lsp-mode
+      :ensure t
+      :commands (lsp lsp-deffered)
+      :hook (lsp-mode . rune/lsp-mode-setup)
+      :init
+      (setq lsp-keymap-prefix "C-c s-p")
+      :config
+      (lsp-enable-which-key-integration t))
 
 #+end_src
 **** LSP UI
@@ -745,6 +747,15 @@ For showing =Playing Emacs= inside Discord
           (setq scss-output-directory "../css")
           (setq scss-compile-at-save t))
 
+#+end_src
+**** Python
+#+begin_src emacs-lisp
+(use-package lsp-python-ms
+  :ensure t
+  :init (setq lsp-python-ms-auto-install-server t)
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-python-ms)
+                          (lsp-deferred))))
 #+end_src
 ** Company Mode
 #+begin_src emacs-lisp

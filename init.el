@@ -456,7 +456,8 @@
 
 (defun rune/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
+  (lsp-headerline-breadcrumb-mode)
+  (lsp))
 
 (use-package lsp-mode
   :ensure t
@@ -541,6 +542,13 @@
   :config
   (setq scss-output-directory "../css")
   (setq scss-compile-at-save t))
+
+(use-package lsp-python-ms
+  :ensure t
+  :init (setq lsp-python-ms-auto-install-server t)
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-python-ms)
+                          (lsp-deferred))))
 
 (use-package company
   :after lsp-mode
