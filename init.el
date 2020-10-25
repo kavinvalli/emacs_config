@@ -459,6 +459,7 @@
   (lsp-headerline-breadcrumb-mode))
 
 (use-package lsp-mode
+  :ensure t
   :commands (lsp lsp-deffered)
   :hook (lsp-mode . rune/lsp-mode-setup)
   :init
@@ -511,6 +512,28 @@
          (typescript-mode . prettier-js-mode))
   :config
   (setq prettier-js-show-errors nil))
+
+(use-package web-mode
+  :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
+  :hook (web-mode . lsp-deferred)
+  :config
+  (setq-default web-mode-code-indent-offset 2)
+  (setq-default web-mode-markup-indent-offset 2)
+  (setq-default web-mode-attribute-indent-offset 2))
+
+;; 1. Start the server with `httpd-start'
+;; 2. Use `impatient-mode' on any buffer
+(use-package impatient-mode
+  :ensure t)
+
+(use-package skewer-mode
+  :ensure t)
+
+(use-package css-mode
+  :mode "\\.css\\'"
+  :hook (css-mode . lsp-deferred)
+  :config
+  (setq css-indent-offset 2))
 
 (use-package company
   :after lsp-mode
