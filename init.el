@@ -232,7 +232,8 @@
   ("f" nil "finished" :exit t))
 
 (rune/leader-keys
-  "ts" '(hydra-text-scale/body :which-key "scale text"))
+  "h" '(:ignore t :which-key "Hydra")
+  "hs" '(hydra-text-scale/body :which-key "Scale Text"))
 
 (defun efs/org-mode-setup ()
   (org-indent-mode)
@@ -402,7 +403,8 @@
 (org-babel-do-load-languages
     'org-babel-load-languages
     '((emacs-lisp . t)
-        (python . t)))
+        (python . t)
+        (js . t)))
 
 (push '("conf-unix" . counf-unix) org-src-lang-modes)
 
@@ -414,10 +416,11 @@
   :hook (org-mode . org-make-toc-mode))
 
 (require 'org-tempo)
-(add-to-list 'org-structure-template-alist '("temp" . " "))
+(add-to-list 'org-structure-template-alist '("temp" . "src"))
 (add-to-list 'org-structure-template-alist '("sh" . "src sh"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
+(add-to-list 'org-structure-template-alist '("js" . "src js"))
 
 (defun efs/org-babel-tangle-config ()
        (when (string-equal (buffer-file-name)
@@ -480,8 +483,8 @@
     :after lsp)
 
 (rune/leader-keys
-  "at" '(:ignore t :which-key "treemacs")
-  "att" 'treemacs-display-current-project-exclusively)
+  "t" '(:ignore t :which-key "Treemacs")
+  "tt" 'treemacs-display-current-project-exclusively)
 
 (use-package typescript-mode
   :mode "\\.ts\\'"
@@ -605,17 +608,18 @@
 (use-package ivy-pass
   :commands ivy-pass
   :config
-  (setq password-store-password-length 12))
+  (setq password-store-password-length 12)
+  (setq epa-file-cache-passphrase-for-symmetric-encryption t))
 
 (use-package auth-source-pass
   :config
   (auth-source-pass-enable))
 
 (rune/leader-keys
-  "ap" '(:ignore t :which-key "pass")
-  "app" 'ivy-pass
-  "api" 'password-store-insert
-  "apg" 'password-store-generate)
+  "p" '(:ignore t :which-key "pass")
+  "pp" 'ivy-pass
+  "pi" 'password-store-insert
+  "pg" 'password-store-generate)
 
 (use-package org-gcal
      :after org
@@ -626,9 +630,9 @@
            org-gcal-file-alist '(("kavinvalli@gmail.com" . "~/Notes/Calendar.org"))))
 
 (rune/leader-keys
-  "ac" '(:ignore t :which-key "calendar")
-  "acs" '(org-gcal-fetch :which-key "sync")
-  "acp" '(org-gcal-post-at-point :which-key "post"))
+  "c" '(:ignore t :which-key "calendar")
+  "cs" '(org-gcal-fetch :which-key "sync")
+  "cp" '(org-gcal-post-at-point :which-key "post"))
 
 (use-package counsel-spotify
     :after ivy
@@ -637,11 +641,11 @@
     (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
 
     (rune/leader-keys
-      "as" '(:ignore t :which-key "Counsel Spotify")
-      "ass" '(counsel-spotify-search-track :which-key "Search Track")
-      "asp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
-      "asa" '(counsel-spotify-search-album :which-key "Search Album")
-      "as>" '(counsel-spotify-next :which-key "Next"))
+      "s" '(:ignore t :which-key "Counsel Spotify")
+      "ss" '(counsel-spotify-search-track :which-key "Search Track")
+      "sp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
+      "sa" '(counsel-spotify-search-album :which-key "Search Album")
+      "s>" '(counsel-spotify-next :which-key "Next"))
 
 ;; (use-package spotify
 ;;   :config
