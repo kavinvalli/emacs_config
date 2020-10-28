@@ -441,6 +441,8 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
     :config
     (setq org-ellipsis " ▾")
 
+    ;; (setq org-src-fontify-natively t)
+
     (setq org-agenda-start-with-log-mode t)
     (setq org-log-done 'time)
     (setq org-log-into-drawer t)
@@ -588,7 +590,7 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
           (python . t)
           (js . t)))
 
-  (push '("conf-unix" . counf-unix) org-src-lang-modes)
+  (push '("conf-unix" . conf-unix) org-src-lang-modes)
 
 #+end_src
 
@@ -641,17 +643,18 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
 * Utilities
 ** Counsel OSX App
 #+begin_src emacs-lisp
-(use-package counsel-osx-app
-  :bind* ("S-M-SPC" . counsel-osx-app)
-  :commands counsel-osx-app
-  :config
-  (setq counsel-osx-app-location
-        (list "/Applications"
-              "/Applications/Misc"
-              "/Applications/Utilities"
-              (expand-file-name "~/Applications")
-              (expand-file-name "~/.nix-profile/Applications")
-              "/Applications/Xcode.app/Contents/Applications")))
+  (use-package counsel-osx-app
+    :bind* ("S-M-SPC" . counsel-osx-app)
+    :commands counsel-osx-app
+    :config
+    (setq counsel-osx-app-location
+          (list "/Applications"
+                "/Applications/Misc"
+                "/Applications/Utilities"
+                (expand-file-name "~/Applications")
+                (expand-file-name "~/.nix-profile/Applications")
+                "/Applications/Xcode.app/Contents/Applications")))
+
 #+end_src
 ** Elcord (Discord)
 For showing =Playing Emacs= inside Discord 
@@ -669,19 +672,21 @@ For showing =Playing Emacs= inside Discord
 **** Basic Setup
 #+begin_src emacs-lisp
 
-    (defun rune/lsp-mode-setup ()
-      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-      (lsp-headerline-breadcrumb-mode)
-      (lsp))
+  (defun rune/lsp-mode-setup ()
+    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode)
+    (lsp))
 
-    (use-package lsp-mode
-      :ensure t
-      :commands (lsp lsp-deffered)
-      :hook (lsp-mode . rune/lsp-mode-setup)
-      :init
-      (setq lsp-keymap-prefix "C-c s-p")
-      :config
-      (lsp-enable-which-key-integration t))
+  (use-package lsp-mode
+    :ensure t
+    :bind (:map lsp-mode-map
+                ("TAB" . completion-at-point))
+    :commands (lsp lsp-deffered)
+    :hook (lsp-mode . rune/lsp-mode-setup)
+    :init
+    (setq lsp-keymap-prefix "C-c s-p")
+    :config
+    (lsp-enable-which-key-integration t))
 
 #+end_src
 **** LSP UI
@@ -753,7 +758,7 @@ For showing =Playing Emacs= inside Discord
 **** HTML
 #+begin_src emacs-lisp
   (use-package web-mode
-    :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
+    :mode "(\\.\\(html?\\|ejs\\|tsx\\|js[x]?\\)\\'"
     :hook (web-mode . lsp-deferred)
     :config
     (setq-default web-mode-code-indent-offset 2)
@@ -952,7 +957,7 @@ machine api.github.com login <you-username>^forge password <token-created>
 ** Some App
 #+begin_src conf-unix :tangle .config/some-app/config :noweb yes
 
-value=<<the-value()>>
+  value=<<the-value()>>
 
 #+end_src
 

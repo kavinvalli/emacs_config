@@ -278,6 +278,8 @@
   :config
   (setq org-ellipsis " ▾")
 
+  ;; (setq org-src-fontify-natively t)
+
   (setq org-agenda-start-with-log-mode t)
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
@@ -406,7 +408,7 @@
         (python . t)
         (js . t)))
 
-(push '("conf-unix" . counf-unix) org-src-lang-modes)
+(push '("conf-unix" . conf-unix) org-src-lang-modes)
 
 (use-package org-special-block-extras
   :ensure t
@@ -464,6 +466,8 @@
 
 (use-package lsp-mode
   :ensure t
+  :bind (:map lsp-mode-map
+              ("TAB" . completion-at-point))
   :commands (lsp lsp-deffered)
   :hook (lsp-mode . rune/lsp-mode-setup)
   :init
@@ -518,7 +522,7 @@
   (setq prettier-js-show-errors nil))
 
 (use-package web-mode
-  :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
+  :mode "(\\.\\(html?\\|ejs\\|tsx\\|js[x]?\\)\\'"
   :hook (web-mode . lsp-deferred)
   :config
   (setq-default web-mode-code-indent-offset 2)
