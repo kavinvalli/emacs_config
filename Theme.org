@@ -1,0 +1,16 @@
+#+title: Custom Theme
+#+PROPERTY: header-args:emacs-lisp :tangle ./custom-theme.el :mkdirp yes
+
+* Initialise Autothemer
+#+begin_src emacs-lisp
+
+  (require 'autothemer)
+
+#+end_src
+
+* Define Theme
+#+begin_src emacs-lisp
+
+  (autothemer-deftheme
+
+#+end_src

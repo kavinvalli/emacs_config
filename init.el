@@ -29,6 +29,9 @@
     :init
     (exec-path-from-shell-initialize))
 
+(use-package autothemer
+  :ensure t)
+
 (setq inhibit-startup-message t)
 
 (scroll-bar-mode -1)        ; Disable visible scrollbar
@@ -425,10 +428,10 @@
 (add-to-list 'org-structure-template-alist '("js" . "src js"))
 
 (defun efs/org-babel-tangle-config ()
-       (when (string-equal (buffer-file-name)
-                           (expand-file-name "~/.emacs.d/Emacs.org"))
+       ;; (when (string-equal (buffer-file-name)
+                           ;; (expand-file-name "~/.emacs.d/Emacs.org"))
         (let ((org-confirm-babel-evaluate nil))
-           (org-babel-tangle))))
+           (org-babel-tangle))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 
@@ -646,7 +649,9 @@
 
     (rune/leader-keys
       "s" '(:ignore t :which-key "Counsel Spotify")
-      "ss" '(counsel-spotify-search-track :which-key "Search Track")
+      "ss" '(:ignore t :which-key "Search")
+			"ssp" '(counsel-spotify-search-playlist :which-key "Search Playlist")
+      "sst" '(counsel-spotify-search-track :which-key "Search Track")
       "sp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
       "sa" '(counsel-spotify-search-album :which-key "Search Album")
       "s>" '(counsel-spotify-next :which-key "Next"))
