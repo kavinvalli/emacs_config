@@ -9,6 +9,9 @@
                               (time-subtract after-init-time before-init-time)))
                      gcs-done)))
 
+(setq rune/is-termux
+      (string-suffix-p "Android" (string-trim (shell-command-to-string "uname -a"))))
+
 (require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -34,21 +37,23 @@
 
 (setq inhibit-startup-message t)
 
-(scroll-bar-mode -1)        ; Disable visible scrollbar
-(tool-bar-mode -1)          ; Disable the toolbar
-(tooltip-mode -1)           ; Disable tooltips
-(set-fringe-mode 10)        ; Give some breathing room
+(unless rune/is-termux
+  (scroll-bar-mode -1)        ; Disable visible scrollbar
+  (tool-bar-mode -1)          ; Disable the toolbar
+  (tooltip-mode -1)           ; Disable tooltips
+  (set-fringe-mode 10))        ; Give some breathing room
 
 (menu-bar-mode -1)            ; Disable the menu bar
 
-(setq initial-scratch-message "Hi Kavin. C-x C-f eh" ) ; Message on Scratch Buffer
+(setq initial-scratch-message "; Hi Kavin. C-x C-f eh" ) ; Message on Scratch Buffer
 
 ;; Configure Transparency in Emacs Window
+(unless rune/is-termux
 (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
 (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 ;; Configure Emacs Window to be fullscreen
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
+(add-to-list 'default-frame-alist '(fullscreen . maximized)))
 
 ;; Set up the visible bell
 (when (equal system-name "Kavins-Air.Dlink")
@@ -57,9 +62,9 @@
   (defun double-flash-mode-line ()
     (let ((flash-sec (/ 1.0 20)))
       (invert-face 'mode-line)
-      (run-with-timer flash-sec nil #'invert-face 'mode-line)
-      (run-with-timer (* 2 flash-sec) nil #'invert-face 'mode-line)
-      (run-with-timer (* 3 flash-sec) nil #'invert-face 'mode-line))))
+        (run-with-timer flash-sec nil #'invert-face 'mode-line)
+        (run-with-timer (* 2 flash-sec) nil #'invert-face 'mode-line)
+        (run-with-timer (* 3 flash-sec) nil #'invert-face 'mode-line))))
 
 (when (equal system-name "kavin-pc")
   (setq visible-bell t))
@@ -93,8 +98,9 @@
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-height 15)))
 
-(use-package doom-themes
-    :init (load-theme 'doom-dracula t))
+(use-package doom-themes :defer t)
+(unless rune/is-termux
+  (load-theme 'doom-dracula t))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -126,15 +132,15 @@
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
-                                        ; Disable Arrow kets in normal and visual modes
-  (define-key evil-normal-state-map (kbd "<left>") 'dw/dont-arrow-me-bro)
-  (define-key evil-normal-state-map (kbd "<right>") 'dw/dont-arrow-me-bro)
-  (define-key evil-normal-state-map (kbd "<down>") 'dw/dont-arrow-me-bro)
-  (define-key evil-normal-state-map (kbd "<up>") 'dw/dont-arrow-me-bro)
-  (evil-global-set-key 'motion (kbd "<left>") 'dw/dont-arrow-me-bro)
-  (evil-global-set-key 'motion (kbd "<right>") 'dw/dont-arrow-me-bro)
-  (evil-global-set-key 'motion (kbd "<down>") 'dw/dont-arrow-me-bro)
-  (evil-global-set-key 'motion (kbd "<up>") 'dw/dont-arrow-me-bro)
+  (unless rune/is-termux                                       
+    (define-key evil-normal-state-map (kbd "<left>") 'dw/dont-arrow-me-bro)
+    (define-key evil-normal-state-map (kbd "<right>") 'dw/dont-arrow-me-bro)
+    (define-key evil-normal-state-map (kbd "<down>") 'dw/dont-arrow-me-bro)
+    (define-key evil-normal-state-map (kbd "<up>") 'dw/dont-arrow-me-bro)
+    (evil-global-set-key 'motion (kbd "<left>") 'dw/dont-arrow-me-bro)
+    (evil-global-set-key 'motion (kbd "<right>") 'dw/dont-arrow-me-bro)
+    (evil-global-set-key 'motion (kbd "<down>") 'dw/dont-arrow-me-bro)
+    (evil-global-set-key 'motion (kbd "<up>") 'dw/dont-arrow-me-bro))
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
@@ -244,6 +250,7 @@
   (visual-line-mode 1))
 
 (use-package org-bullets
+  :if (not rune/is-termux) 
   :after org
   :hook (org-mode . org-bullets-mode)
   :custom
@@ -280,6 +287,11 @@
   :ensure org-plus-contrib
   :config
   (setq org-ellipsis " ▾")
+
+  (setq org-directory
+        (if dw/is-termux
+            "~/storage/shared/Notes"
+          "~/Notes"))
 
   ;; (setq org-src-fontify-natively t)
 
@@ -457,6 +469,7 @@
 
 (use-package elcord
   :ensure t
+  :disabled rune/is-termux
   :custom
   (elcord-display-buffer-details nil)
   :config
@@ -657,7 +670,8 @@
       "sst" '(counsel-spotify-search-track :which-key "Search Track")
       "sp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
       "sa" '(counsel-spotify-search-album :which-key "Search Album")
-      "s>" '(counsel-spotify-next :which-key "Next"))
+      "s>" '(counsel-spotify-next :which-key "Next")
+      "s<" '(counsel-spotify-previous :which-key "Previous"))
 
 ;; (use-package spotify
 ;;   :config
