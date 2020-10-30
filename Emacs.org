@@ -473,7 +473,7 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
     (setq org-ellipsis " ▾")
 
     (setq org-directory
-          (if dw/is-termux
+          (if rune/is-termux
               "~/storage/shared/Notes"
             "~/Notes"))
 
