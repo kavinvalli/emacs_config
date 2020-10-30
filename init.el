@@ -250,7 +250,7 @@
   (visual-line-mode 1))
 
 (use-package org-bullets
-  :if (not rune/is-termux) 
+  ;; :if (not rune/is-termux) 
   :after org
   :hook (org-mode . org-bullets-mode)
   :custom
@@ -469,7 +469,7 @@
 
 (use-package elcord
   :ensure t
-  :disabled rune/is-termux
+  :disabled rune/is-termuxk
   :custom
   (elcord-display-buffer-details nil)
   :config
