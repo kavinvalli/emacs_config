@@ -94,7 +94,7 @@
   :custom ((doom-modeline-height 15)))
 
 (use-package doom-themes
-  :init (load-theme 'doom-dracula t))
+    :init (load-theme 'doom-dracula t))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -431,7 +431,7 @@
        ;; (when (string-equal (buffer-file-name)
                            ;; (expand-file-name "~/.emacs.d/Emacs.org"))
         (let ((org-confirm-babel-evaluate nil))
-           (org-babel-tangle))
+           (org-babel-tangle)))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 
@@ -461,6 +461,9 @@
   (elcord-display-buffer-details nil)
   :config
   (elcord-mode))
+
+(use-package speed-type
+  :ensure t)
 
 (defun rune/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
@@ -616,7 +619,7 @@
   :commands ivy-pass
   :config
   (setq password-store-password-length 12)
-  (setq epa-file-cache-passphrase-for-symmetric-encryption t))
+  (setq epa-file-cache-passphrase-for-symmetric-encryption nil))
 
 (use-package auth-source-pass
   :config
@@ -669,6 +672,6 @@
 (rune/leader-keys
   "y" '(ivy-youtube :which-key "Ivy Youtube"))
 
-;; (use-package cricbuzz)
+(use-package cricbuzz)
 
 (+ 50 100)

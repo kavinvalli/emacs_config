@@ -48,6 +48,7 @@
 - [[#utilities][Utilities]]
   - [[#counsel-osx-app][Counsel OSX App]]
   - [[#elcord-discord][Elcord (Discord)]]
+  - [[#speed-type][Speed Type]]
 - [[#development][Development]]
   - [[#languages][Languages]]
     - [[#language-server][Language Server]]
@@ -207,7 +208,7 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
 #+begin_src emacs-lisp
 
   (use-package doom-themes
-    :init (load-theme 'doom-dracula t))
+      :init (load-theme 'doom-dracula t))
 
 #+end_src
 ** Rainbow Delimiter
@@ -220,12 +221,14 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
 * Keybinding Configuration
 ** General
 #+begin_src emacs-lisp
+
   (use-package general
     :config
     (general-create-definer rune/leader-keys
       :keymaps '(normal insert visual emacs)
       :prefix "SPC"
       :global-prefix "C-SPC"))
+
 #+end_src
 ** Let's be Evil
 #+begin_src emacs-lisp
@@ -342,11 +345,14 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
 ** Productivity
 *** Autopair Config
 #+begin_src emacs-lisp
+
   (use-package autopair)
   (autopair-global-mode)
+
 #+end_src
 *** Emmet Mode
 #+begin_src emacs-lisp
+
   (use-package emmet-mode
     :diminish (emmet-mode . "ε")
     :bind* (("C-)" . emmet-next-edit-point)
@@ -364,9 +370,11 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
     (add-hook 'web-mode-hook 'emmet-mode)
     (setq emmet-expand-jsx-className? t)
     (setq emmet-self-closing-tag-style " /"))
+
 #+end_src
 *** Yasnippet
 #+begin_src emacs-lisp
+
   (use-package yasnippet
     :init
     (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
@@ -374,11 +382,14 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
     (yas-global-mode))
 
   (provide 'init-yasnippet)
+
 #+end_src
 ** Commenting Lines
 #+begin_src emacs-lisp
+
   (use-package evil-nerd-commenter
     :bind ("s-/" . evilnc-comment-or-uncomment-lines))
+
 #+end_src
 ** Text Scaling
 #+begin_src emacs-lisp
@@ -631,7 +642,7 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
          ;; (when (string-equal (buffer-file-name)
                              ;; (expand-file-name "~/.emacs.d/Emacs.org"))
           (let ((org-confirm-babel-evaluate nil))
-             (org-babel-tangle))
+             (org-babel-tangle)))
   
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 #+end_src
@@ -673,6 +684,13 @@ For showing =Playing Emacs= inside Discord
   (elcord-display-buffer-details nil)
   :config
   (elcord-mode))
+#+end_src
+** Speed Type
+#+begin_src emacs-lisp
+
+  (use-package speed-type
+    :ensure t)
+
 #+end_src
 * Development
 ** Languages
@@ -893,21 +911,21 @@ machine api.github.com login <you-username>^forge password <token-created>
 - ivy-pass to make managing passwords easier in Emacs
 - auth-source-pass to store passwords in one place
 #+begin_src emacs-lisp
-    (use-package ivy-pass
-      :commands ivy-pass
-      :config
-      (setq password-store-password-length 12)
-      (setq epa-file-cache-passphrase-for-symmetric-encryption t))
+  (use-package ivy-pass
+    :commands ivy-pass
+    :config
+    (setq password-store-password-length 12)
+    (setq epa-file-cache-passphrase-for-symmetric-encryption nil))
 
-    (use-package auth-source-pass
-      :config
-      (auth-source-pass-enable))
+  (use-package auth-source-pass
+    :config
+    (auth-source-pass-enable))
 
-    (rune/leader-keys
-      "p" '(:ignore t :which-key "pass")
-      "pp" 'ivy-pass
-      "pi" 'password-store-insert
-      "pg" 'password-store-generate)
+  (rune/leader-keys
+    "p" '(:ignore t :which-key "pass")
+    "pp" 'ivy-pass
+    "pi" 'password-store-insert
+    "pg" 'password-store-generate)
 #+end_src
 * Calendar Sync
 #+begin_src emacs-lisp
@@ -961,7 +979,7 @@ machine api.github.com login <you-username>^forge password <token-created>
 #+end_src
 * Cricket
 #+begin_src emacs-lisp
-  ;; (use-package cricbuzz)
+  (use-package cricbuzz)
 #+end_src
 * Applications
 ** Some App
