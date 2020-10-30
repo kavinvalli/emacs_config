@@ -894,6 +894,10 @@ For showing =Playing Emacs= inside Discord
 Befor using Forge, remember to do the following
 - Go to [[https://github.com][Github]]
 - Create a personal access token in [[https://github.com/settings/tokens][Personal Access Tokens tab]]
+  - Grant Access to:
+    - =repo= grants full read/write access to private and public repositories.
+    - =user= grants access to profile information.
+    - =read:org= grants read-only access to organization membership.
 - In your device run
 #+begin_src sh
   vi ~/.authinfo
