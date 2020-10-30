@@ -218,8 +218,7 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
 #+begin_src emacs-lisp
 
   (use-package doom-themes :defer t)
-  (unless rune/is-termux
-    (load-theme 'doom-dracula t))
+  (load-theme 'doom-dracula t)
 
 #+end_src
 ** Rainbow Delimiter
