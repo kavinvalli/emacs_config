@@ -75,6 +75,8 @@
   - [[#spotify][Spotify]]
 - [[#youtube][Youtube]]
 - [[#cricket][Cricket]]
+- [[#terminal][Terminal]]
+  - [[#term-mode][term-mode]]
 - [[#applications][Applications]]
   - [[#some-app][Some App]]
 :END:
@@ -1003,6 +1005,14 @@ machine api.github.com login <you-username>^forge password <token-created>
 * Cricket
 #+begin_src emacs-lisp
   (use-package cricbuzz)
+#+end_src
+* Terminal
+** term-mode
+#+begin_src emacs-lisp
+  ;; (use-package term
+  ;;   :config
+  ;;   (setq explicit-shell-file-name "bash")
+  ;;   (setq term-prompt-regexp "^[^#$%>\\n]*[#$%>] *"))
 #+end_src
 * Applications
 ** Some App

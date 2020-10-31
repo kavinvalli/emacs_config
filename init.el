@@ -688,4 +688,9 @@
 
 (use-package cricbuzz)
 
+;; (use-package term
+;;   :config
+;;   (setq explicit-shell-file-name "bash")
+;;   (setq term-prompt-regexp "^[^#$%>\\n]*[#$%>] *"))
+
 (+ 50 100)
