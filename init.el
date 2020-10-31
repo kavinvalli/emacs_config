@@ -99,8 +99,7 @@
   :custom ((doom-modeline-height 15)))
 
 (use-package doom-themes :defer t)
-(unless rune/is-termux
-  (load-theme 'doom-dracula t))
+(load-theme 'doom-dracula t)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -289,7 +288,7 @@
   (setq org-ellipsis " ▾")
 
   (setq org-directory
-        (if dw/is-termux
+        (if rune/is-termux
             "~/storage/shared/Notes"
           "~/Notes"))
 

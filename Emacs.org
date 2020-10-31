@@ -220,8 +220,7 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
 #+begin_src emacs-lisp
 
   (use-package doom-themes :defer t)
-  (unless rune/is-termux
-    (load-theme 'doom-dracula t))
+  (load-theme 'doom-dracula t)
 
 #+end_src
 ** Rainbow Delimiter
@@ -475,7 +474,7 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
     (setq org-ellipsis " ▾")
 
     (setq org-directory
-          (if dw/is-termux
+          (if rune/is-termux
               "~/storage/shared/Notes"
             "~/Notes"))
 
