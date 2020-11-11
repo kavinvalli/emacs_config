@@ -9,6 +9,11 @@
                               (time-subtract after-init-time before-init-time)))
                      gcs-done)))
 
+;; (use-package dashboard
+;;   :ensure t
+;;   :config
+;;   (dashboard-setup-startup-hook))
+
 (setq rune/is-termux
       (string-suffix-p "Android" (string-trim (shell-command-to-string "uname -a"))))
 
@@ -95,11 +100,26 @@
 (use-package all-the-icons)
 
 (use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
+  :hook (after-init . doom-modeline-init)
+  :custom
+  (doom-modeline-height 15)
+  (doom-modeline-bar-width 6)
+  (doom-modeline-lsp t)
+  (doom-modeline-github nil)
+  (doom-modeline-mu4e nil)
+  (doom-modeline-irc nil)
+  (doom-modeline-minor-modes t)
+  (doom-modeline-persp-name nil)
+  (doom-modeline-buffer-file-name-style 'truncate-except-project)
+  (doom-modeline-major-mode-icon nil))
 
 (use-package doom-themes :defer t)
+(use-package spacemacs-theme :defer t)
 (load-theme 'doom-dracula t)
+;; (load-theme 'spacemacs-dark t)
+;; (load-theme 'doom-palenight t)
+;; (load-theme 'doom-horizon t)
+;; (load-theme 'doom-acario-dark t)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -203,6 +223,7 @@
 (autopair-global-mode)
 
 (use-package emmet-mode
+  :mode "\\.edge\\'"
   :diminish (emmet-mode . "ε")
   :bind* (("C-)" . emmet-next-edit-point)
           ("C-(" . emmet-prev-edit-point)
@@ -217,7 +238,7 @@
   ;; Auto-start on any markup modes
   (add-hook 'sgml-mode-hook 'emmet-mode)
   (add-hook 'web-mode-hook 'emmet-mode)
-  (setq emmet-expand-jsx-className? t)
+  (setq emmet-expand-jsx-className? nil)  ;; Set to nil because className was being used in non-jsx files too
   (setq emmet-self-closing-tag-style " /"))
 
 (use-package yasnippet
@@ -230,6 +251,23 @@
 
 (use-package evil-nerd-commenter
   :bind ("s-/" . evilnc-comment-or-uncomment-lines))
+
+(use-package comment-tags
+  :init
+	(autoload 'comment-tags-mode "comment-tags-mode")
+  (setq comment-tags-keyword-faces
+        `(("TODO" . ,(list :weight 'bold :foreground "#28ABE3"))
+          ("BUG" . ,(list :weight 'bold :foreground "#DB3340"))
+          ("INFO" . ,(list :weight 'bold :foreground "#F7EAC8"))
+          ("DONE" . ,(list :weight 'bold :foreground "#1FDA9A"))))
+  (setq comment-tags-keymap-prefix (kbd "C-c t"))
+  (setq comment-tags-comment-start-only t
+        comment-tags-require-colon t
+        comment-tags-case-sensitive t
+        comment-tags-show-faces t
+        comment-tags-lighter nil)
+  :config
+  (add-hook 'prog-mode-hook 'comment-tags-mode))
 
 (use-package hydra)
 
@@ -420,7 +458,8 @@
     'org-babel-load-languages
     '((emacs-lisp . t)
         (python . t)
-        (js . t)))
+        (js . t)
+        (sql . t)))
 
 (push '("conf-unix" . conf-unix) org-src-lang-modes)
 
@@ -437,12 +476,13 @@
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
 (add-to-list 'org-structure-template-alist '("js" . "src js"))
+(add-to-list 'org-structure-template-alist '("html" . "src html"))
+(add-to-list 'org-structure-template-alist '("sql" . "src sql"))
+(add-to-list 'org-structure-template-alist '("rust" . "src rust"))
 
 (defun efs/org-babel-tangle-config ()
-       ;; (when (string-equal (buffer-file-name)
-                           ;; (expand-file-name "~/.emacs.d/Emacs.org"))
-        (let ((org-confirm-babel-evaluate nil))
-           (org-babel-tangle)))
+  (let ((org-confirm-babel-evaluate nil))
+    (org-babel-tangle)))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 
@@ -506,6 +546,7 @@
 
 (rune/leader-keys
   "t" '(:ignore t :which-key "Treemacs")
+  "to" 'treemacs
   "tt" 'treemacs-display-current-project-exclusively)
 
 (use-package typescript-mode
@@ -540,7 +581,7 @@
   (setq prettier-js-show-errors nil))
 
 (use-package web-mode
-  :mode "(\\.\\(html?\\|ejs\\|tsx\\|js[x]?\\)\\'"
+  :mode "(\\.\\(html?\\|ejs\\|tsx\\|js[x]?\\|edge\\)\\'"
   :hook (web-mode . lsp-deferred)
   :config
   (setq-default web-mode-code-indent-offset 2)
@@ -572,12 +613,50 @@
   :ensure t
   :init (setq lsp-python-ms-auto-install-server t)
   :hook (python-mode . (lambda ()
-                          (require 'lsp-python-ms)
+                         (require 'lsp-python-ms)
                           (lsp-deferred))))
+
+(use-package cargo
+      :ensure t
+      :mode "\\.rs"
+      :init
+      (bind-keys :prefix-map cargo-mode-map
+                 :prefix "C-c c"
+                 ("C" . cargo-process-repeat)
+                 ("." . cargo-process-repeat)
+                 ("X" . cargo-run-example)
+                 ("c" . cargo-process-build)
+                 ("d" . cargo-process-doc)
+                 ("e" . cargo-process-bench)
+                 ("R" . cargo-process-current-test)
+                 ("f" . cargo-process-fmt)
+                 ("i" . cargo-process-init)
+                 ("n" . cargo-process-new)
+                 ("o" . cargo-process-current-file-tests)
+                 ("s" . cargo-process-search)
+                 ("u" . cargo-process-update)
+                 ("x" . cargo-process-run)
+                 ("t" . cargo-process-test)
+                 ("R" . cargo-process-test-regexp)))
+(use-package rustic
+  :ensure t
+  :mode ("\\.rs" . rustic-mode)
+  :hook (web-mode . lsp-deferred)
+  :commands (cargo-minor-mode)
+  :config
+  (bind-keys :map rustic-mode-map
+             ("C-c TAB" . rustic-format-buffer)
+             ("TAB" . company-indent-or-complete-common))
+  :init
+  (setq rustic-lsp-server 'rust-analyzer)
+  (setq company-tooltip-align-annotations t
+        rustic-format-on-save nil)
+  (add-hook 'rustic-mode-hook #'cargo-minor-mode))
 
 (use-package company
   :after lsp-mode
-  :hook (lsp-mode . company-mode)
+  :hook ((lsp-mode . company-mode)
+         (eldoc-mode . company-mode))
   :bind (:map company-active-map
               ("<tab>" . company-complete-selection))
   (:map lsp-mode-map
@@ -627,6 +706,10 @@
   :config
   (lorem-ipsum-use-default-bindings))
 
+(rune/leader-keys
+  "r" '(:ignore t :which-key "Rename")
+  "rf" 'rename-file)
+
 (use-package ivy-pass
   :commands ivy-pass
   :config
@@ -643,18 +726,18 @@
   "pi" 'password-store-insert
   "pg" 'password-store-generate)
 
-(use-package org-gcal
-     :after org
-     :config
+;; (use-package org-gcal
+;;      :after org
+;;      :config
 
-     (setq org-gcal-client-id (password-store-get "API/Google/kavinvalli-emacs-id")
-           org-gcal-client-secret (password-store-get "API/Google/kavinvalli-emacs-secret")
-           org-gcal-file-alist '(("kavinvalli@gmail.com" . "~/Notes/Calendar.org"))))
+;;      (setq org-gcal-client-id (password-store-get "API/Google/kavinvalli-emacs-id")
+;;            org-gcal-client-secret (password-store-get "API/Google/kavinvalli-emacs-secret")
+;;            org-gcal-file-alist '(("kavinvalli@gmail.com" . "~/Notes/Calendar.org"))))
 
-(rune/leader-keys
-  "c" '(:ignore t :which-key "calendar")
-  "cs" '(org-gcal-fetch :which-key "sync")
-  "cp" '(org-gcal-post-at-point :which-key "post"))
+;; (rune/leader-keys
+;;   "c" '(:ignore t :which-key "calendar")
+;;   "cs" '(org-gcal-fetch :which-key "sync")
+;;   "cp" '(org-gcal-post-at-point :which-key "post"))
 
 (use-package counsel-spotify
     :after ivy
@@ -687,9 +770,34 @@
 
 (use-package cricbuzz)
 
-;; (use-package term
-;;   :config
-;;   (setq explicit-shell-file-name "bash")
-;;   (setq term-prompt-regexp "^[^#$%>\\n]*[#$%>] *"))
+(use-package term
+  :config
+  (setq explicit-shell-file-name "zsh")
+  (setq term-prompt-regexp "^[^#$%>\\n]*[#$%>] *"))
+
+(use-package dired
+  :ensure nil
+  :commands (dired dired-jump)
+  :bind (("C-x C-j" . dired-jump))
+  :custom ((dired-listing-switches "-agho --group-directories-first")
+           (insert-directory-program "/usr/local/bin/gls")
+           (delete-by-moving-to-trash t))
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-single-up-directory
+    "l" 'dired-single-buffer))
+
+(use-package dired-single)
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-open
+  :config
+  (setq dired-open-extensions '(("png" . "open")
+                                ("jpg" . "open")
+                                ("jpeg" . "open")
+                                ("pdf" . "open")
+                                ("mov" . "open"))))
 
 (+ 50 100)
