@@ -20,12 +20,12 @@
 (require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                           ("org" . "https://orgmode.org/elpa/")
+                         ("org" . "https://orgmode.org/elpa/")
                            ("elpa" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)
 (unless package-archive-contents
-    (package-refresh-contents))
+  (package-refresh-contents))
 
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
@@ -33,9 +33,9 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-  (use-package exec-path-from-shell
-    :init
-    (exec-path-from-shell-initialize))
+(use-package exec-path-from-shell
+  :init
+  (exec-path-from-shell-initialize))
 
 (use-package autothemer
   :ensure t)
@@ -52,13 +52,11 @@
 
 (setq initial-scratch-message "; Hi Kavin. C-x C-f eh" ) ; Message on Scratch Buffer
 
-;; Configure Transparency in Emacs Window
 (unless rune/is-termux
-(set-frame-parameter (selected-frame) 'alpha '(90 . 90))
-(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
-;; Configure Emacs Window to be fullscreen
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-(add-to-list 'default-frame-alist '(fullscreen . maximized)))
+  (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
+  (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+  (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+  (add-to-list 'default-frame-alist '(fullscreen . maximized)))
 
 ;; Set up the visible bell
 (when (equal system-name "Kavins-Air.Dlink")
@@ -67,9 +65,9 @@
   (defun double-flash-mode-line ()
     (let ((flash-sec (/ 1.0 20)))
       (invert-face 'mode-line)
-        (run-with-timer flash-sec nil #'invert-face 'mode-line)
-        (run-with-timer (* 2 flash-sec) nil #'invert-face 'mode-line)
-        (run-with-timer (* 3 flash-sec) nil #'invert-face 'mode-line))))
+      (run-with-timer flash-sec nil #'invert-face 'mode-line)
+      (run-with-timer (* 2 flash-sec) nil #'invert-face 'mode-line)
+      (run-with-timer (* 3 flash-sec) nil #'invert-face 'mode-line))))
 
 (when (equal system-name "kavin-pc")
   (setq visible-bell t))
@@ -82,6 +80,7 @@
                 term-mode-hook
                 shell-mode-hook
                 treemacs-mode-hook
+                vterm-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -114,12 +113,12 @@
   (doom-modeline-major-mode-icon nil))
 
 (use-package doom-themes :defer t)
-(use-package spacemacs-theme :defer t)
-(load-theme 'doom-dracula t)
+;; (use-package spacemacs-theme :defer t)
+;; (load-theme 'doom-dracula t)
 ;; (load-theme 'spacemacs-dark t)
 ;; (load-theme 'doom-palenight t)
 ;; (load-theme 'doom-horizon t)
-;; (load-theme 'doom-acario-dark t)
+(load-theme 'doom-acario-dark t)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -171,6 +170,12 @@
 
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
+(use-package which-key
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 1))
+
 (use-package command-log-mode)
 
 (use-package ivy
@@ -203,12 +208,6 @@
          :map minibuffer-local-map
          ("C-r" . 'counsel-minibuffer-history)))
 
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
-
 (use-package helpful
   :custom
   (counsel-describe-function-function #'helpful-callable)
@@ -240,34 +239,6 @@
   (add-hook 'web-mode-hook 'emmet-mode)
   (setq emmet-expand-jsx-className? nil)  ;; Set to nil because className was being used in non-jsx files too
   (setq emmet-self-closing-tag-style " /"))
-
-(use-package yasnippet
-  :init
-  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-  :config
-  (yas-global-mode))
-
-(provide 'init-yasnippet)
-
-(use-package evil-nerd-commenter
-  :bind ("s-/" . evilnc-comment-or-uncomment-lines))
-
-(use-package comment-tags
-  :init
-	(autoload 'comment-tags-mode "comment-tags-mode")
-  (setq comment-tags-keyword-faces
-        `(("TODO" . ,(list :weight 'bold :foreground "#28ABE3"))
-          ("BUG" . ,(list :weight 'bold :foreground "#DB3340"))
-          ("INFO" . ,(list :weight 'bold :foreground "#F7EAC8"))
-          ("DONE" . ,(list :weight 'bold :foreground "#1FDA9A"))))
-  (setq comment-tags-keymap-prefix (kbd "C-c t"))
-  (setq comment-tags-comment-start-only t
-        comment-tags-require-colon t
-        comment-tags-case-sensitive t
-        comment-tags-show-faces t
-        comment-tags-lighter nil)
-  :config
-  (add-hook 'prog-mode-hook 'comment-tags-mode))
 
 (use-package hydra)
 
@@ -455,13 +426,14 @@
   (visual-fill-column-mode 1))
 
 (org-babel-do-load-languages
-    'org-babel-load-languages
-    '((emacs-lisp . t)
-        (python . t)
-        (js . t)
-        (sql . t)))
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (python . t)
+   (js . t)
+   (sql . t)
+   (lua . t)))
 
-(push '("conf-unix" . conf-unix) org-src-lang-modes)
+ (push '("conf-unix" . conf-unix) org-src-lang-modes)
 
 (use-package org-special-block-extras
   :ensure t
@@ -479,6 +451,7 @@
 (add-to-list 'org-structure-template-alist '("html" . "src html"))
 (add-to-list 'org-structure-template-alist '("sql" . "src sql"))
 (add-to-list 'org-structure-template-alist '("rust" . "src rust"))
+(add-to-list 'org-structure-template-alist '("lua" . "src lua"))
 
 (defun efs/org-babel-tangle-config ()
   (let ((org-confirm-babel-evaluate nil))
@@ -517,6 +490,16 @@
 (use-package speed-type
   :ensure t)
 
+(defun rune/bluetooth-connect-philips ()
+  (interactive)
+  (start-process-shell-command "blueutil" nil "blueutil --connect a4-77-58-7a-2d-7d"))
+
+
+(rune/leader-keys
+  "b" '(:ignore t :which-key "Bluetooth")
+  "bc" '(:ignore t :which-key "connect")
+  "bcp" '(rune/bluetooth-connect-philips :which-key "Philips SHB3075"))
+
 (defun rune/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
   (lsp-headerline-breadcrumb-mode)
@@ -549,6 +532,8 @@
   "to" 'treemacs
   "tt" 'treemacs-display-current-project-exclusively)
 
+(use-package dap-mode)
+
 (use-package typescript-mode
   :mode "\\.ts\\'"
   :hook (typescript-mode . lsp-deferred)
@@ -564,15 +549,12 @@
   :mode "\\.js\\'"
   :hook (js2-mode . lsp-deferred)
   :config
-  ;; Use js2-mode for Node scripts
   (add-to-list 'magic-mode-alist '("#!/usr/bin/env node" . js2-mode))
-
-  ;; Don't use built-in syntax checking
   (setq js2-mode-show-strict-warnings nil)
-
-  ;; Set up proper indentation in JavaScript and JSON files
   (add-hook 'js2-mode-hook #'rune/set-js-indentation)
-  (add-hook 'json-mode-hook #'rune/set-js-indentation))
+  (add-hook 'json-mode-hook #'rune/set-js-indentation)
+  (require 'dap-node)
+  (dap-node-setup))
 
 (use-package prettier-js
   :hook ((js2-mode . prettier-js-mode)
@@ -653,6 +635,12 @@
         rustic-format-on-save nil)
   (add-hook 'rustic-mode-hook #'cargo-minor-mode))
 
+(use-package lua-mode
+  :ensure t
+  :mode (("\\.lua\\'" . lua-mode))
+  :config
+  (add-hook 'lua-mode-hook #'company-mode))
+
 (use-package company
   :after lsp-mode
   :hook ((lsp-mode . company-mode)
@@ -706,6 +694,26 @@
   :config
   (lorem-ipsum-use-default-bindings))
 
+(use-package evil-nerd-commenter
+  :bind ("s-/" . evilnc-comment-or-uncomment-lines))
+
+(use-package comment-tags
+  :init
+	(autoload 'comment-tags-mode "comment-tags-mode")
+  (setq comment-tags-keyword-faces
+        `(("TODO" . ,(list :weight 'bold :foreground "#28ABE3"))
+          ("BUG" . ,(list :weight 'bold :foreground "#DB3340"))
+          ("INFO" . ,(list :weight 'bold :foreground "#F7EAC8"))
+          ("DONE" . ,(list :weight 'bold :foreground "#1FDA9A"))))
+  (setq comment-tags-keymap-prefix (kbd "C-c t"))
+  (setq comment-tags-comment-start-only t
+        comment-tags-require-colon t
+        comment-tags-case-sensitive t
+        comment-tags-show-faces t
+        comment-tags-lighter nil)
+  :config
+  (add-hook 'prog-mode-hook 'comment-tags-mode))
+
 (rune/leader-keys
   "r" '(:ignore t :which-key "Rename")
   "rf" 'rename-file)
@@ -740,40 +748,41 @@
 ;;   "cp" '(org-gcal-post-at-point :which-key "post"))
 
 (use-package counsel-spotify
-    :after ivy
-    :config
-    (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
-    (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
+  :after ivy
+  :config
+  (setq counsel-spotify-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
+  (setq counsel-spotify-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret")))
 
-    (rune/leader-keys
-      "s" '(:ignore t :which-key "Counsel Spotify")
-      "ss" '(:ignore t :which-key "Search")
-			"ssp" '(counsel-spotify-search-playlist :which-key "Search Playlist")
-      "sst" '(counsel-spotify-search-track :which-key "Search Track")
+(rune/leader-keys
+  "s" '(:ignore t :which-key "Counsel Spotify")
+  "ss" '(:ignore t :which-key "Search")
+  "ssp" '(counsel-spotify-search-playlist :which-key "Search Playlist")
+  "sst" '(counsel-spotify-search-track :which-key "Search Track")
       "sp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
       "sa" '(counsel-spotify-search-album :which-key "Search Album")
       "s>" '(counsel-spotify-next :which-key "Next")
       "s<" '(counsel-spotify-previous :which-key "Previous"))
 
-;; (use-package spotify
-;;   :config
-;;   (setq spotify-transport 'connect)
-;;   (setq spotify-oauth2-client-id (password-store-get "API/Spotify/kavinvalli-emacs-id"))
-;;   (setq spotify-oauth2-client-secret (password-store-get "API/Spotify/kavinvalli-emacs-secret"))
-;;   (define-key spotify-mode-map (kbd "C-c .") 'spotify-command-map))
-
 (use-package ivy-youtube
-    :config
-    (setq ivy-youtube-key (password-store-get "API/Youtube/kavinvalli-emacs-api-key")))
+  :config
+  (setq ivy-youtube-key (password-store-get "API/Youtube/kavinvalli-emacs-api-key")))
 (rune/leader-keys
   "y" '(ivy-youtube :which-key "Ivy Youtube"))
-
-(use-package cricbuzz)
 
 (use-package term
   :config
   (setq explicit-shell-file-name "zsh")
   (setq term-prompt-regexp "^[^#$%>\\n]*[#$%>] *"))
+
+(use-package eterm-256color
+  :hook (term-mode . eterm-256color-mode))
+
+(use-package vterm
+  :commands vterm
+  :config
+  (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
+  ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
+  (setq vterm-max-scrollback 10000))
 
 (use-package dired
   :ensure nil
@@ -799,5 +808,36 @@
                                 ("jpeg" . "open")
                                 ("pdf" . "open")
                                 ("mov" . "open"))))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
+
+(use-package dired-rainbow
+  :config
+  (progn
+    (dired-rainbow-define-chmod directory "#6cb2eb" "d.*")
+    (dired-rainbow-define html "#eb5286" ("css" "less" "sass" "scss" "htm" "html" "jhtm" "mht" "eml" "mustache" "xhtml"))
+    (dired-rainbow-define xml "#f2d024" ("xml" "xsd" "xsl" "xslt" "wsdl" "bib" "json" "msg" "pgn" "rss" "yaml" "yml" "rdata"))
+    (dired-rainbow-define document "#9561e2" ("docm" "doc" "docx" "odb" "odt" "pdb" "pdf" "ps" "rtf" "djvu" "epub" "odp" "ppt" "pptx"))
+    (dired-rainbow-define markdown "#ffed4a" ("org" "etx" "info" "markdown" "md" "mkd" "nfo" "pod" "rst" "tex" "textfile" "txt"))
+    (dired-rainbow-define database "#6574cd" ("xlsx" "xls" "csv" "accdb" "db" "mdb" "sqlite" "nc"))
+    (dired-rainbow-define media "#de751f" ("mp3" "mp4" "MP3" "MP4" "avi" "mpeg" "mpg" "flv" "ogg" "mov" "mid" "midi" "wav" "aiff" "flac"))
+    (dired-rainbow-define image "#f66d9b" ("tiff" "tif" "cdr" "gif" "ico" "jpeg" "jpg" "png" "psd" "eps" "svg"))
+    (dired-rainbow-define log "#c17d11" ("log"))
+    (dired-rainbow-define shell "#f6993f" ("awk" "bash" "bat" "sed" "sh" "zsh" "vim"))
+    (dired-rainbow-define interpreted "#38c172" ("py" "ipynb" "rb" "pl" "t" "msql" "mysql" "pgsql" "sql" "r" "clj" "cljs" "scala" "js"))
+    (dired-rainbow-define compiled "#4dc0b5" ("asm" "cl" "lisp" "el" "c" "h" "c++" "h++" "hpp" "hxx" "m" "cc" "cs" "cp" "cpp" "go" "f" "for" "ftn" "f90" "f95" "f03" "f08" "s" "rs" "hi" "hs" "pyc" ".java"))
+    (dired-rainbow-define executable "#8cc4ff" ("exe" "msi"))
+    (dired-rainbow-define compressed "#51d88a" ("7z" "zip" "bz2" "tgz" "txz" "gz" "xz" "z" "Z" "jar" "war" "ear" "rar" "sar" "xpi" "apk" "xz" "tar"))
+    (dired-rainbow-define packaged "#faad63" ("deb" "rpm" "apk" "jad" "jar" "cab" "pak" "pk3" "vdf" "vpk" "bsp"))
+    (dired-rainbow-define encrypted "#ffed4a" ("gpg" "pgp" "asc" "bfe" "enc" "signature" "sig" "p12" "pem"))
+    (dired-rainbow-define fonts "#6cb2eb" ("afm" "fon" "fnt" "pfb" "pfm" "ttf" "otf"))
+    (dired-rainbow-define partition "#e3342f" ("dmg" "iso" "bin" "nrg" "qcow" "toast" "vcd" "vmdk" "bak"))
+    (dired-rainbow-define vc "#0074d9" ("git" "gitignore" "gitattributes" "gitmodules"))
+    (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*")
+    ))
 
 (+ 50 100)
