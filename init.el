@@ -51,10 +51,10 @@
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-(set-face-attribute 'default nil :font "MesloLGS NF" :height runemacs/default-font-size)
+(set-face-attribute 'default nil :font "Fira Code Retina" :height runemacs/default-font-size)
 
 ;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "MesloLGS NF" :height 140)
+(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 140)
 
 ;; Set the variable pitch face
 (set-face-attribute 'variable-pitch nil :family "Cantarell" :height 160 :weight 'regular)
@@ -400,3 +400,16 @@
 (use-package forge)
 
 (+ 50 100)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(forge evil-magit magit counsel-projectile projectile counsel-osx-app org-make-toc visual-fill-column org-bullets hydra autopair helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline all-the-icons ivy command-log-mode evil-collection evil general use-package)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

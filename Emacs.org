@@ -101,10 +101,10 @@
 
 ** Font Configuration
 #+begin_src emacs-lisp
-(set-face-attribute 'default nil :font "MesloLGS NF" :height runemacs/default-font-size)
+(set-face-attribute 'default nil :font "Fira Code Retina" :height runemacs/default-font-size)
 
 ;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "MesloLGS NF" :height 140)
+(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 140)
 
 ;; Set the variable pitch face
 (set-face-attribute 'variable-pitch nil :family "Cantarell" :height 160 :weight 'regular)
