@@ -117,8 +117,8 @@
 ;; (load-theme 'doom-dracula t)
 ;; (load-theme 'spacemacs-dark t)
 ;; (load-theme 'doom-palenight t)
-;; (load-theme 'doom-horizon t)
-(load-theme 'doom-acario-dark t)
+(load-theme 'doom-horizon t)
+;; (load-theme 'doom-acario-dark t)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -452,6 +452,7 @@
 (add-to-list 'org-structure-template-alist '("sql" . "src sql"))
 (add-to-list 'org-structure-template-alist '("rust" . "src rust"))
 (add-to-list 'org-structure-template-alist '("lua" . "src lua"))
+(add-to-list 'org-structure-template-alist '("dart" . "src dart"))
 
 (defun efs/org-babel-tangle-config ()
   (let ((org-confirm-babel-evaluate nil))

@@ -288,8 +288,8 @@ Only needed when using custom theme
   ;; (load-theme 'doom-dracula t)
   ;; (load-theme 'spacemacs-dark t)
   ;; (load-theme 'doom-palenight t)
-  ;; (load-theme 'doom-horizon t)
-  (load-theme 'doom-acario-dark t)
+  (load-theme 'doom-horizon t)
+  ;; (load-theme 'doom-acario-dark t)
 
 #+end_src
 ** Rainbow Delimiter
@@ -714,6 +714,7 @@ Only needed when using custom theme
   (add-to-list 'org-structure-template-alist '("sql" . "src sql"))
   (add-to-list 'org-structure-template-alist '("rust" . "src rust"))
   (add-to-list 'org-structure-template-alist '("lua" . "src lua"))
+  (add-to-list 'org-structure-template-alist '("dart" . "src dart"))
 
 #+end_src
 ** Auto-tangle Configuration Files
@@ -970,6 +971,14 @@ For showing =Playing Emacs= inside Discord
     (add-hook 'rustic-mode-hook #'cargo-minor-mode))
 
 #+end_src
+# **** Dart
+# #+begin_src emacs-lisp
+
+#   (use-package lsp-dart
+#     :ensure t
+#     :hook (dart-mode . lsp-deferred))
+
+# #+end_src
 **** Lua
 #+begin_src emacs-lisp
 
