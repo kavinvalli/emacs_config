@@ -9,10 +9,17 @@
                               (time-subtract after-init-time before-init-time)))
                      gcs-done)))
 
-;; (use-package dashboard
-;;   :ensure t
-;;   :config
-;;   (dashboard-setup-startup-hook))
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook)
+  (setq dashboard-banner-logo-title "Hey Kavin! Don't forget to see your agendas: M-x org-agenda-list")
+  (setq dashboard-items '((recents . 2)
+                          (projects . 2)
+                          (agenda . 5)))
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-startup-banner )
 
 (setq rune/is-termux
       (string-suffix-p "Android" (string-trim (shell-command-to-string "uname -a"))))
@@ -111,6 +118,8 @@
   (doom-modeline-persp-name nil)
   (doom-modeline-buffer-file-name-style 'truncate-except-project)
   (doom-modeline-major-mode-icon nil))
+
+(use-package hide-mode-line)
 
 (use-package doom-themes :defer t)
 ;; (use-package spacemacs-theme :defer t)
@@ -310,6 +319,7 @@
   (setq org-agenda-files
         '("~/Notes/Tasks.org"
           "~/Notes/Birthdays.org"
+          "~/Documents/10N/preboards.org"
           "~/Notes/Calendar.org"))
 
   (setq org-refile-targets
@@ -425,15 +435,19 @@
         visual-fill-column-center-text t)
   (visual-fill-column-mode 1))
 
+(use-package ob-dart)
+
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((emacs-lisp . t)
    (python . t)
    (js . t)
    (sql . t)
+   (dart . t)
+   (calc . t)
    (lua . t)))
 
- (push '("conf-unix" . conf-unix) org-src-lang-modes)
+(push '("conf-unix" . conf-unix) org-src-lang-modes)
 
 (use-package org-special-block-extras
   :ensure t
@@ -464,9 +478,50 @@
   :ensure t
    :custom (alert-default-style 'osx-notifier)
    :config
-   (setq org-alert-interval 300
+   (setq org-alert-interval 1800
          org-alert-notification-title "Reminder!")
    (org-alert-enable))
+
+(use-package org-wild-notifier
+  :ensure t
+  :custom
+  (alert-default-style 'osx-notifier)
+  (org-wild-notifier-alert-time '(1 10 30))
+  (org-wild-notifier-keyword-whitelist '("TODO"))
+  (org-wild-notifier-notification-title "Org Wild Reminder!")
+  :config
+  (org-wild-notifier-mode 1))
+
+(defun rune/presentation-setup ()
+  (setq text-scale-mode-amount 3)
+  (org-display-inline-images)
+  (hide-mode-line-mode 1)
+  (text-scale-mode 1))
+
+(defun rune/presentation-end ()
+  (hide-mode-line-mode 0)
+  (text-scale-mode 0))
+
+(use-package org-tree-slide
+  :hook ((org-tree-slide-play . rune/presentation-setup)
+         (org-tree-slide-stop . rune/presentation-end))
+  :custom
+  (org-tree-slide-slide-in-effect t)
+  (org-tree-slide-activate-message "Presentation Started")
+  (org-tree-slide-deactivate-message "Presentation finished!")
+  (org-tree-slide-header t)
+  (org-tree-slide-breadcrumbs " // ")
+  (org-image-actual-width nil))
+
+(use-package ox-reveal
+  :ensure t
+  :config
+  (require 'ox-reveal)
+  (setq org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js")
+  (setq org-reveal-mathjax t))
+
+(use-package htmlize
+  :ensure t)
 
 (use-package counsel-osx-app
   :bind* ("S-M-SPC" . counsel-osx-app)
@@ -808,7 +863,8 @@
                                 ("jpg" . "open")
                                 ("jpeg" . "open")
                                 ("pdf" . "open")
-                                ("mov" . "open"))))
+                                ("mov" . "open")
+                                ("html" . "open")))
 
 (use-package dired-hide-dotfiles
   :hook (dired-mode . dired-hide-dotfiles-mode)

@@ -19,6 +19,8 @@
   - [[#font-configuration][Font Configuration]]
   - [[#icons][Icons]]
   - [[#modeline][Modeline]]
+    - [[#doom-modeline][Doom Modeline]]
+  - [[#hide-modeline][Hide Modeline]]
   - [[#theme][Theme]]
   - [[#rainbow-delimiter][Rainbow Delimiter]]
 - [[#keybinding-configuration][Keybinding Configuration]]
@@ -51,6 +53,9 @@
   - [[#create-template-snippets][Create Template Snippets]]
   - [[#auto-tangle-configuration-files][Auto-tangle Configuration Files]]
   - [[#org-alert][Org-alert]]
+  - [[#org-wild-notifier][Org wild notifier]]
+  - [[#org-tree-slide][Org Tree Slide]]
+- [[#revealjs][Reveal.js]]
 - [[#utilities][Utilities]]
   - [[#counsel-osx-app][Counsel OSX App]]
   - [[#elcord-discord][Elcord (Discord)]]
@@ -126,10 +131,17 @@ Taken from [[https://github.com/daviwil/dotfiles/blob/master/Emacs.org#startup-p
 * Emacs Dashboard
 #+begin_src emacs-lisp
 
-  ;; (use-package dashboard
-  ;;   :ensure t
-  ;;   :config
-  ;;   (dashboard-setup-startup-hook))
+        (use-package dashboard
+          :ensure t
+          :config
+          (dashboard-setup-startup-hook)
+          (setq dashboard-banner-logo-title "Hey Kavin! Don't forget to see your agendas: M-x org-agenda-list")
+          (setq dashboard-items '((recents . 2)
+                                  (projects . 2)
+                                  (agenda . 5)))
+          (setq dashboard-set-file-icons t)
+          (setq dashboard-set-heading-icons t)
+          (setq dashboard-startup-banner )
 
 #+end_src
 * System Settings
@@ -263,6 +275,7 @@ Only needed when using custom theme
 
 #+end_src
 ** Modeline
+*** Doom Modeline
 #+begin_src emacs-lisp
 
   (use-package doom-modeline
@@ -278,6 +291,13 @@ Only needed when using custom theme
     (doom-modeline-persp-name nil)
     (doom-modeline-buffer-file-name-style 'truncate-except-project)
     (doom-modeline-major-mode-icon nil))
+
+#+end_src
+
+** Hide Modeline
+#+begin_src emacs-lisp
+
+  (use-package hide-mode-line)
 
 #+end_src
 ** Theme
@@ -544,6 +564,7 @@ Only needed when using custom theme
     (setq org-agenda-files
           '("~/Notes/Tasks.org"
             "~/Notes/Birthdays.org"
+            "~/Documents/10N/preboards.org"
             "~/Notes/Calendar.org"))
 
     (setq org-refile-targets
@@ -678,15 +699,19 @@ Only needed when using custom theme
 
 #+begin_src emacs-lisp
 
+  (use-package ob-dart)
+
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
      (python . t)
      (js . t)
      (sql . t)
+     (dart . t)
+     (calc . t)
      (lua . t)))
 
-   (push '("conf-unix" . conf-unix) org-src-lang-modes)
+  (push '("conf-unix" . conf-unix) org-src-lang-modes)
 
 #+end_src
 
@@ -734,9 +759,67 @@ Only needed when using custom theme
     :ensure t
      :custom (alert-default-style 'osx-notifier)
      :config
-     (setq org-alert-interval 300
+     (setq org-alert-interval 1800
            org-alert-notification-title "Reminder!")
      (org-alert-enable))
+
+#+end_src
+** Org wild notifier
+#+begin_src emacs-lisp
+
+  (use-package org-wild-notifier
+    :ensure t
+    :custom
+    (alert-default-style 'osx-notifier)
+    (org-wild-notifier-alert-time '(1 10 30))
+    (org-wild-notifier-keyword-whitelist '("TODO"))
+    (org-wild-notifier-notification-title "Org Wild Reminder!")
+    :config
+    (org-wild-notifier-mode 1))
+
+#+end_src
+** Org Tree Slide
+Presentation in org mode
+#+begin_src emacs-lisp
+
+  (defun rune/presentation-setup ()
+    (setq text-scale-mode-amount 3)
+    (org-display-inline-images)
+    (hide-mode-line-mode 1)
+    (text-scale-mode 1))
+
+  (defun rune/presentation-end ()
+    (hide-mode-line-mode 0)
+    (text-scale-mode 0))
+
+  (use-package org-tree-slide
+    :hook ((org-tree-slide-play . rune/presentation-setup)
+           (org-tree-slide-stop . rune/presentation-end))
+    :custom
+    (org-tree-slide-slide-in-effect t)
+    (org-tree-slide-activate-message "Presentation Started")
+    (org-tree-slide-deactivate-message "Presentation finished!")
+    (org-tree-slide-header t)
+    (org-tree-slide-breadcrumbs " // ")
+    (org-image-actual-width nil))
+
+
+#+end_src
+Run =org-tree-slide-mode=
+Navigate slides with =C-<= and =C->=
+
+* Reveal.js
+#+begin_src emacs-lisp
+
+  (use-package ox-reveal
+    :ensure t
+    :config
+    (require 'ox-reveal)
+    (setq org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js")
+    (setq org-reveal-mathjax t))
+
+  (use-package htmlize
+    :ensure t)
 
 #+end_src
 * Utilities
@@ -1295,13 +1378,14 @@ Helps keep down number of dired buffers to 1
 *** Open external files
 #+begin_src emacs-lisp
 
-    (use-package dired-open
-      :config
-      (setq dired-open-extensions '(("png" . "open")
-                                    ("jpg" . "open")
-                                    ("jpeg" . "open")
-                                    ("pdf" . "open")
-                                    ("mov" . "open"))))
+      (use-package dired-open
+        :config
+        (setq dired-open-extensions '(("png" . "open")
+                                      ("jpg" . "open")
+                                      ("jpeg" . "open")
+                                      ("pdf" . "open")
+                                      ("mov" . "open")
+                                      ("html" . "open")))
 
 #+end_src
 *** Hide/Show dotfiles
