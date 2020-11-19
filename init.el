@@ -59,11 +59,10 @@
 
 (setq initial-scratch-message "; Hi Kavin. C-x C-f eh" ) ; Message on Scratch Buffer
 
-(unless rune/is-termux
-  (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
-  (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
-  (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-  (add-to-list 'default-frame-alist '(fullscreen . maximized)))
+(set-frame-parameter (selected-frame) 'alpha '(90 . 90))
+(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 ;; Set up the visible bell
 (when (equal system-name "Kavins-Air.Dlink")
@@ -305,12 +304,7 @@
   :config
   (setq org-ellipsis " ▾")
 
-  (setq org-directory
-        (if rune/is-termux
-            "~/storage/shared/Notes"
-          "~/Notes"))
-
-  ;; (setq org-src-fontify-natively t)
+  (setq org-src-fontify-natively t)
 
   (setq org-agenda-start-with-log-mode t)
   (setq org-log-done 'time)
@@ -322,7 +316,8 @@
           "~/Documents/10N/preboards.org"
           "~/Notes/Calendar.org"))
 
-  (setq org-refile-targets
+  (setq
+   org-refile-targets
     '(("Archive.org" :maxlevel . 1)
       ("Tasks.org" :maxlevel . 1)))
 
@@ -559,18 +554,18 @@
 (defun rune/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
   (lsp-headerline-breadcrumb-mode)
-  (lsp))
+   (lsp))
 
-(use-package lsp-mode
-  :ensure t
-  :bind (:map lsp-mode-map
-              ("TAB" . completion-at-point))
-  :commands (lsp lsp-deffered)
-  :hook (lsp-mode . rune/lsp-mode-setup)
-  :init
-  (setq lsp-keymap-prefix "C-c s-p")
-  :config
-  (lsp-enable-which-key-integration t))
+ (use-package lsp-mode
+   :ensure t
+   :bind (:map lsp-mode-map
+               ("TAB" . completion-at-point))
+   :commands (lsp lsp-deffered)
+   :hook (lsp-mode . rune/lsp-mode-setup)
+   :init
+   (setq lsp-keymap-prefix "C-c s-p")
+   :config
+   (lsp-enable-which-key-integration t))
 
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
@@ -654,86 +649,6 @@
                          (require 'lsp-python-ms)
                           (lsp-deferred))))
 
-(use-package cargo
-      :ensure t
-      :mode "\\.rs"
-      :init
-      (bind-keys :prefix-map cargo-mode-map
-                 :prefix "C-c c"
-                 ("C" . cargo-process-repeat)
-                 ("." . cargo-process-repeat)
-                 ("X" . cargo-run-example)
-                 ("c" . cargo-process-build)
-                 ("d" . cargo-process-doc)
-                 ("e" . cargo-process-bench)
-                 ("R" . cargo-process-current-test)
-                 ("f" . cargo-process-fmt)
-                 ("i" . cargo-process-init)
-                 ("n" . cargo-process-new)
-                 ("o" . cargo-process-current-file-tests)
-                 ("s" . cargo-process-search)
-                 ("u" . cargo-process-update)
-                 ("x" . cargo-process-run)
-                 ("t" . cargo-process-test)
-                 ("R" . cargo-process-test-regexp)))
-(use-package rustic
-  :ensure t
-  :mode ("\\.rs" . rustic-mode)
-  :hook (web-mode . lsp-deferred)
-  :commands (cargo-minor-mode)
-  :config
-  (bind-keys :map rustic-mode-map
-             ("C-c TAB" . rustic-format-buffer)
-             ("TAB" . company-indent-or-complete-common))
-  :init
-  (setq rustic-lsp-server 'rust-analyzer)
-  (setq company-tooltip-align-annotations t
-        rustic-format-on-save nil)
-  (add-hook 'rustic-mode-hook #'cargo-minor-mode))
-
-(use-package lua-mode
-  :ensure t
-  :mode (("\\.lua\\'" . lua-mode))
-  :config
-  (add-hook 'lua-mode-hook #'company-mode))
-
-(use-package company
-  :after lsp-mode
-  :hook ((lsp-mode . company-mode)
-         (eldoc-mode . company-mode))
-  :bind (:map company-active-map
-              ("<tab>" . company-complete-selection))
-  (:map lsp-mode-map
-        ("<tab>" . company-indent-or-complete-common))
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
-
-(use-package company-box
-  :diminish
-  :functions (all-the-icons-faicon
-              all-the-icons-material
-              all-the-icons-octicon
-              all-the-icons-alltheicon)
-  :hook (company-mode . company-box-mode)
-  :init (setq company-box-enable-icon (display-graphic-p))
-  :config
-  (setq company-box-backends-colors nil))
-
-(use-package projectile
-  :diminish projectile-mode
-  :config (projectile-mode)
-  :custom ((projectile-completion-system 'ivy))
-  :bind-keymap
-  ("C-c p" . projectile-command-map)
-  :init
-  (when (file-directory-p "~/Documents/projects")
-    (setq projectile-project-search-path '("~/Documents/projects")))
-  (setq projectile-switch-project-action #'projectile-dired))
-
-(use-package counsel-projectile
-  :config (counsel-projectile-mode))
-
 (use-package magit
      :custom
      (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
@@ -743,7 +658,8 @@
 
 (setq auth-sources '("~/.authinfo"))
 
-(use-package forge)
+  (when (equal system-name "Kavins-Air.Dlink")
+ (use-package forge))
 
 (use-package lorem-ipsum
   :ensure t
@@ -755,7 +671,7 @@
 
 (use-package comment-tags
   :init
-	(autoload 'comment-tags-mode "comment-tags-mode")
+       (autoload 'comment-tags-mode "comment-tags-mode")
   (setq comment-tags-keyword-faces
         `(("TODO" . ,(list :weight 'bold :foreground "#28ABE3"))
           ("BUG" . ,(list :weight 'bold :foreground "#DB3340"))
@@ -774,6 +690,7 @@
   "r" '(:ignore t :which-key "Rename")
   "rf" 'rename-file)
 
+(when (equal system-name "Kavins-Air.Dlink")
 (use-package ivy-pass
   :commands ivy-pass
   :config
@@ -788,7 +705,7 @@
   "p" '(:ignore t :which-key "pass")
   "pp" 'ivy-pass
   "pi" 'password-store-insert
-  "pg" 'password-store-generate)
+  "pg" 'password-store-generate))
 
 ;; (use-package org-gcal
 ;;      :after org
@@ -803,6 +720,7 @@
 ;;   "cs" '(org-gcal-fetch :which-key "sync")
 ;;   "cp" '(org-gcal-post-at-point :which-key "post"))
 
+(when (equal system-name "Kavins-Air.Dlink")
 (use-package counsel-spotify
   :after ivy
   :config
@@ -817,17 +735,19 @@
       "sp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
       "sa" '(counsel-spotify-search-album :which-key "Search Album")
       "s>" '(counsel-spotify-next :which-key "Next")
-      "s<" '(counsel-spotify-previous :which-key "Previous"))
+      "s<" '(counsel-spotify-previous :which-key "Previous")))
 
+(when (equal system-name "Kavins-Air.Dlink")
 (use-package ivy-youtube
   :config
   (setq ivy-youtube-key (password-store-get "API/Youtube/kavinvalli-emacs-api-key")))
+
 (rune/leader-keys
-  "y" '(ivy-youtube :which-key "Ivy Youtube"))
+  "y" '(ivy-youtube :which-key "Ivy Youtube")))
 
 (use-package term
   :config
-  (setq explicit-shell-file-name "zsh")
+  (setq explicit-shell-file-name "bash")
   (setq term-prompt-regexp "^[^#$%>\\n]*[#$%>] *"))
 
 (use-package eterm-256color
@@ -840,12 +760,59 @@
   ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
   (setq vterm-max-scrollback 10000))
 
+(use-package bufler
+  :ensure t
+  :bind (("C-M-j" . bufler-switch-buffer)
+         ("C-M-k" . bufler-workspace-frame-set))
+  :config
+  (evil-collection-define-key 'normal 'bufler-list-mode-map
+    (kbd "RET")   'bufler-list-buffer-switch
+    (kbd "M-RET") 'bufler-list-buffer-peek
+    "D"           'bufler-list-buffer-kill)
+
+  (setf bufler-groups
+        (bufler-defgroups
+          ;; Subgroup collecting all named workspaces.
+          (group (auto-workspace))
+          ;; Subgroup collecting buffers in a projectile project.
+          (group (auto-projectile))
+          ;; Grouping browser windows
+          (group
+           (group-or "Browsers"
+                     (name-match "Vimb" (rx bos "vimb"))
+                     (name-match "Qutebrowser" (rx bos "Qutebrowser"))
+                     (name-match "Chromium" (rx bos "Chromium"))))
+          (group
+           (group-or "Chat"
+                     (mode-match "Telega" (rx bos "telega-"))))
+          (group
+           ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
+           (group-or "Help/Info"
+                     (mode-match "*Help*" (rx bos (or "help-" "helpful-")))
+                     ;; (mode-match "*Helpful*" (rx bos "helpful-"))
+                     (mode-match "*Info*" (rx bos "info-"))))
+          (group
+           ;; Subgroup collecting all special buffers (i.e. ones that are not
+           ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
+           ;; through to other groups, so they end up grouped with their project buffers).
+           (group-and "*Special*"
+                      (name-match "**Special**"
+                                  (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace" "Pinentry") "*"))
+                      (lambda (buffer)
+                        (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
+                                             buffer)
+                                    (funcall (mode-match "Dired" (rx bos "dired"))
+                                             buffer)
+                                    (funcall (auto-file) buffer))
+                          "*Special*"))))
+          ;; Group remaining buffers by major mode.
+          (auto-mode))))
+
 (use-package dired
   :ensure nil
   :commands (dired dired-jump)
   :bind (("C-x C-j" . dired-jump))
   :custom ((dired-listing-switches "-agho --group-directories-first")
-           (insert-directory-program "/usr/local/bin/gls")
            (delete-by-moving-to-trash t))
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
@@ -896,5 +863,79 @@
     (dired-rainbow-define vc "#0074d9" ("git" "gitignore" "gitattributes" "gitmodules"))
     (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*")
     ))
+
+(when (equal system-name "kavin-pc")
+  (add-hook 'exwm-update-class-hook
+            (lambda ()
+              (exwm-workspace-rename-buffer exwm-class-name)))
+
+  (add-hook 'exwm-update-title-hook
+            (lambda ()
+              (pcase exwm-class-name
+                ("Vimb" (exwm-workspace-rename-buffer (format "vimb: %s" exwm-title)))
+                ("qutebrowser" (exwm-workspace-rename-buffer (format "Qutebrowser: %s" exwm-title))))))
+
+  (defun rune/move-buffer-to-workspace ()
+    (interactive)
+    (pcase exwm-class-name
+      ("qutebrowser" (exwm-workspace-move-window 1))
+      ("discord" (exwm-workspace-move-window 2))))
+
+  (add-hook 'exwm-manage-finish-hook
+            (lambda ()
+              ;; Send the window where it belongs
+              (rune/move-buffer-to-workspace)))
+
+  (use-package exwm
+    :config
+   (setq exwm-workspace-number 5)
+
+   ;; Rebind Caps lock to control
+   (start-process-shell-command "xmodmap" nil "xmodmap ~/.emacs.d/exwm/Xmodmap")
+
+   (require 'exwm-randr)
+   (exwm-randr-enable)
+   (start-process-shell-command "xrandr" nil "xrandr --output VIRTUAL1 --off --output DP3 --off --output DP2 --mode 1920x1080 --pos 0x0 --rotate normal --output DP1 --off --output HDMI3 --off --output HDMI2 --off --output HDMI1 --off")
+
+   (require 'exwm-systemtray)
+   (exwm-systemtray-enable)
+
+   (setq exwm-input-prefix-keys
+         '(?\C-x
+           ?\C-u
+         ?\C-h
+         ?\M-x
+         ?\M-`
+         ?\M-:
+         ?\M-&
+         ?\C-\M-j
+         ?\C-\ ))
+
+   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+   (setq exwm-input-global-keys
+         `(
+           ([?\s-r] . exwm-reset)
+           ([s-left] . windmove-left)
+           ([s-right] . windmove-right)
+           ([s-up] . windmove-up)
+           ([s-down] . windmove-down)
+           ;; Launch applications via shell commands
+           ([?\s-&] . (lambda (command)
+                        (interactive (list (read-shell-command "$ ")))
+                        (start-process-shell-command command nil command)))
+           ;; Switch Workspace
+         ([?\s-w] . exwm-workspace-switch)
+         ([?\s-`] . (lambda () (interactive)
+                      (exwm-workspace-switch-create 0)))
+
+         ,@(mapcar (lambda (i)
+                     `(,(kbd (format "s-%d" i)) .
+                        (lambda ()
+                          (interactive)
+                          (exwm-workspace-switch-create ,i))))
+                   (number-sequence 0 9))))
+   (exwm-enable))
+  )
 
 (+ 50 100)
