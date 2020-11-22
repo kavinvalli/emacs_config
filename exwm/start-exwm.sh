@@ -1,10 +1,11 @@
-#!bin/sh
-
+#!/bin/sh
 # Set the screen DPI
 xrdb ~/.emacs.d/exwm/Xresource
 
-gsettings set org.gnome.desktop.background picture-uri file:///home/netree/backgrounds/mountains.jpg
 
-compton -b
+compton &
 
-exec dbus-launch --exit-with-session emacs -mm --debug-init
+wmname LG3D
+export _JAVA_AWT_WM_NONREPARENTING=1
+
+exec dbus-launch --exit-with-session emacs -mm --debug-init -l ~/.emacs.d/desktop.el

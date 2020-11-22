@@ -9,6 +9,7 @@
                               (time-subtract after-init-time before-init-time)))
                      gcs-done)))
 
+(when (equal system-name "Kavins-Air.Dlink")
 (use-package dashboard
   :ensure t
   :config
@@ -19,7 +20,7 @@
                           (agenda . 5)))
   (setq dashboard-set-file-icons t)
   (setq dashboard-set-heading-icons t)
-  (setq dashboard-startup-banner )
+  (setq dashboard-startup-banner 'logo)))
 
 (setq rune/is-termux
       (string-suffix-p "Android" (string-trim (shell-command-to-string "uname -a"))))
@@ -105,18 +106,9 @@
 (use-package all-the-icons)
 
 (use-package doom-modeline
-  :hook (after-init . doom-modeline-init)
+  :init (doom-modeline-mode 1)
   :custom
-  (doom-modeline-height 15)
-  (doom-modeline-bar-width 6)
-  (doom-modeline-lsp t)
-  (doom-modeline-github nil)
-  (doom-modeline-mu4e nil)
-  (doom-modeline-irc nil)
-  (doom-modeline-minor-modes t)
-  (doom-modeline-persp-name nil)
-  (doom-modeline-buffer-file-name-style 'truncate-except-project)
-  (doom-modeline-major-mode-icon nil))
+  (doom-modeline-height 15))
 
 (use-package hide-mode-line)
 
@@ -214,7 +206,11 @@
          ("C-x C-f" . counsel-find-file)
          ("C-M-j" . counsel-switch-buffer)
          :map minibuffer-local-map
-         ("C-r" . 'counsel-minibuffer-history)))
+         ("C-r" . 'counsel-minibuffer-history))
+  :custom
+  (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
+  :config
+  (counsel-mode 1))
 
 (use-package helpful
   :custom
@@ -310,16 +306,18 @@
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
 
+(when (equal system-name "Kavins-Air.Dlink")
   (setq org-agenda-files
         '("~/Notes/Tasks.org"
           "~/Notes/Birthdays.org"
           "~/Documents/10N/preboards.org"
-          "~/Notes/Calendar.org"))
+          "~/Notes/Calendar.org")))
 
+(when (equal system-name "Kavins-Air.Dlink")
   (setq
    org-refile-targets
     '(("Archive.org" :maxlevel . 1)
-      ("Tasks.org" :maxlevel . 1)))
+      ("Tasks.org" :maxlevel . 1))))
 
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
@@ -649,6 +647,43 @@
                          (require 'lsp-python-ms)
                           (lsp-deferred))))
 
+(use-package company
+    :after lsp-mode
+    :hook ((lsp-mode . company-mode)
+           (eldoc-mode . company-mode))
+    :bind (:map company-active-map
+                ("<tab>" . company-complete-selection))
+    (:map lsp-mode-map
+          ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0))
+
+  (use-package company-box
+    :diminish
+    :functions (all-the-icons-faicon
+                all-the-icons-material
+                all-the-icons-octicon
+                all-the-icons-alltheicon)
+    :hook (company-mode . company-box-mode)
+    :init (setq company-box-enable-icon (display-graphic-p))
+    :config
+    (setq company-box-backends-colors nil))
+
+(use-package projectile
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom ((projectile-completion-system 'ivy))
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :init
+    (when (file-directory-p "~/Documents/projects")
+      (setq projectile-project-search-path '("~/Documents/projects")))
+    (setq projectile-switch-project-action #'projectile-dired))
+
+  (use-package counsel-projectile
+    :config (counsel-projectile-mode))
+
 (use-package magit
      :custom
      (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
@@ -831,7 +866,7 @@
                                 ("jpeg" . "open")
                                 ("pdf" . "open")
                                 ("mov" . "open")
-                                ("html" . "open")))
+                                ("html" . "open"))))
 
 (use-package dired-hide-dotfiles
   :hook (dired-mode . dired-hide-dotfiles-mode)
@@ -864,78 +899,11 @@
     (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*")
     ))
 
-(when (equal system-name "kavin-pc")
-  (add-hook 'exwm-update-class-hook
-            (lambda ()
-              (exwm-workspace-rename-buffer exwm-class-name)))
-
-  (add-hook 'exwm-update-title-hook
-            (lambda ()
-              (pcase exwm-class-name
-                ("Vimb" (exwm-workspace-rename-buffer (format "vimb: %s" exwm-title)))
-                ("qutebrowser" (exwm-workspace-rename-buffer (format "Qutebrowser: %s" exwm-title))))))
-
-  (defun rune/move-buffer-to-workspace ()
+(defun rune/suspend ()
     (interactive)
-    (pcase exwm-class-name
-      ("qutebrowser" (exwm-workspace-move-window 1))
-      ("discord" (exwm-workspace-move-window 2))))
+    (start-process-shell-command "suspend" nil "systemctl suspend"))
 
-  (add-hook 'exwm-manage-finish-hook
-            (lambda ()
-              ;; Send the window where it belongs
-              (rune/move-buffer-to-workspace)))
-
-  (use-package exwm
-    :config
-   (setq exwm-workspace-number 5)
-
-   ;; Rebind Caps lock to control
-   (start-process-shell-command "xmodmap" nil "xmodmap ~/.emacs.d/exwm/Xmodmap")
-
-   (require 'exwm-randr)
-   (exwm-randr-enable)
-   (start-process-shell-command "xrandr" nil "xrandr --output VIRTUAL1 --off --output DP3 --off --output DP2 --mode 1920x1080 --pos 0x0 --rotate normal --output DP1 --off --output HDMI3 --off --output HDMI2 --off --output HDMI1 --off")
-
-   (require 'exwm-systemtray)
-   (exwm-systemtray-enable)
-
-   (setq exwm-input-prefix-keys
-         '(?\C-x
-           ?\C-u
-         ?\C-h
-         ?\M-x
-         ?\M-`
-         ?\M-:
-         ?\M-&
-         ?\C-\M-j
-         ?\C-\ ))
-
-   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
-
-   (setq exwm-input-global-keys
-         `(
-           ([?\s-r] . exwm-reset)
-           ([s-left] . windmove-left)
-           ([s-right] . windmove-right)
-           ([s-up] . windmove-up)
-           ([s-down] . windmove-down)
-           ;; Launch applications via shell commands
-           ([?\s-&] . (lambda (command)
-                        (interactive (list (read-shell-command "$ ")))
-                        (start-process-shell-command command nil command)))
-           ;; Switch Workspace
-         ([?\s-w] . exwm-workspace-switch)
-         ([?\s-`] . (lambda () (interactive)
-                      (exwm-workspace-switch-create 0)))
-
-         ,@(mapcar (lambda (i)
-                     `(,(kbd (format "s-%d" i)) .
-                        (lambda ()
-                          (interactive)
-                          (exwm-workspace-switch-create ,i))))
-                   (number-sequence 0 9))))
-   (exwm-enable))
-  )
+  (rune/leader-keys
+    "s" '(rune/suspend :which-key "Suspend"))
 
 (+ 50 100)
