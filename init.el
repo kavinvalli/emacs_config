@@ -16,10 +16,11 @@
   (setq dashboard-banner-logo-title "Hey Kavin! Don't forget to see your agendas: M-x org-agenda-list")
   (setq dashboard-items '((recents . 2)
                           (projects . 2)
-                          (agenda . 5)))
+                          (agenda . 10)))
   (setq dashboard-set-file-icons t)
   (setq dashboard-set-heading-icons t)
-  (setq dashboard-startup-banner )
+  (setq dashboard-week-agenda t)
+  (setq dashboard-startup-banner 'logo))
 
 (setq rune/is-termux
       (string-suffix-p "Android" (string-trim (shell-command-to-string "uname -a"))))
@@ -649,6 +650,43 @@
                          (require 'lsp-python-ms)
                           (lsp-deferred))))
 
+(use-package company
+    :after lsp-mode
+    :hook ((lsp-mode . company-mode)
+           (eldoc-mode . company-mode))
+    :bind (:map company-active-map
+                ("<tab>" . company-complete-selection))
+    (:map lsp-mode-map
+          ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0))
+
+  (use-package company-box
+    :diminish
+    :functions (all-the-icons-faicon
+                all-the-icons-material
+                all-the-icons-octicon
+                all-the-icons-alltheicon)
+    :hook (company-mode . company-box-mode)
+    :init (setq company-box-enable-icon (display-graphic-p))
+    :config
+    (setq company-box-backends-colors nil))
+
+(use-package projectile
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom ((projectile-completion-system 'ivy))
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :init
+    (when (file-directory-p "~/Documents/projects")
+      (setq projectile-project-search-path '("~/Documents/projects")))
+    (setq projectile-switch-project-action #'projectile-dired))
+
+  (use-package counsel-projectile
+    :config (counsel-projectile-mode))
+
 (use-package magit
      :custom
      (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
@@ -689,6 +727,30 @@
 (rune/leader-keys
   "r" '(:ignore t :which-key "Rename")
   "rf" 'rename-file)
+
+(use-package darkroom
+  :commands darkroom-mode
+  :config
+  (setq darkroom-text-scale-increase 0))
+
+(defun rune/enter-focus-mode ()
+  (interactive)
+  (darkroom-mode 1)
+  (display-line-numbers-mode 0))
+
+(defun rune/leave-focus-mode ()
+  (interactive)
+  (darkroom-mode 0)
+  (display-line-numbers-mode 1))
+
+(defun rune/toggle-focus-mode ()
+  (interactive)
+  (if (symbol-value darkroom-mode)
+    (rune/leave-focus-mode)
+    (rune/enter-focus-mode)))
+
+(rune/leader-keys
+  "tf" '(rune/toggle-focus-mode :which-key "focus mode"))
 
 (when (equal system-name "Kavins-Air.Dlink")
 (use-package ivy-pass
@@ -760,6 +822,110 @@
   ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
   (setq vterm-max-scrollback 10000))
 
+(defun read-file (file-path)
+  (with-temp-buffer
+    (insert-file-contents file-path)
+    (buffer-string)))
+
+(defun rune/get-current-package-version ()
+  (interactive)
+  (let ((package-json-file (concat (eshell/pwd) "/package.json")))
+    (when (file-exists-p package-json-file)
+      (let* ((package-json-contents (read-file package-json-file))
+             (package-json (ignore-errors (json-parse-string package-json-contents))))
+        (when package-json
+          (ignore-errors (gethash "version" package-json)))))))
+
+(defun rune/get-prompt-path ()
+  (let* ((current-path (eshell/pwd))
+         (git-output (shell-command-to-string "git rev-parse --show-toplevel"))
+         (has-path (not (string-match "^fatal" git-output))))
+    (if (not has-path)
+        (abbreviate-file-name current-path)
+      (string-remove-prefix (file-name-directory git-output) current-path))))
+
+(defun rune/eshell-prompt ()
+  (let ((current-branch (magit-get-current-branch))
+        (package-version (rune/get-current-package-version)))
+    (concat
+     "\n"
+     (propertize (system-name) 'face `(:foreground "#62aeed"))
+     (propertize " ॐ " 'face `(:foreground "white"))
+     (propertize (rune/get-prompt-path) 'face `(:foreground "#82cfd3"))
+     (when current-branch
+       (concat
+        (propertize " • " 'face `(:foreground "white"))
+        (propertize (concat " " current-branch) 'face `(:foreground "#c475f0"))))
+     (when package-version
+       (concat
+        (propertize " @ " 'face `(:foreground "white"))
+        (propertize package-version 'face `(:foreground "#e8a206"))))
+     (propertize " • " 'face `(:foreground "white"))
+     (propertize (format-time-string "%I:%M:%S %p") 'face `(:foreground "#5a5b7f"))
+     (if (= (user-uid) 0)
+         (propertize "\n#" 'face `(:foreground "red2"))
+       (propertize "\nλ" 'face `(:foreground "#aece4a")))
+     (propertize " " 'face `(:foreground "white")))))
+
+(defun rune/configure-eshell ()
+  (require 'evil-collection-eshell)
+  (evil-collection-eshell-setup)
+  (use-package xterm-color)
+  (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
+  (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+  (add-hook 'eshell-before-prompt-hook
+            (lambda ()
+              (setq xterm-color-preserve-properties t)))
+
+  (add-hook 'eshell-pre-command-hook
+            '(lambda () (setenv "TERM" "xterm-256color")))
+  (add-hook 'eshell-post-command-hook
+            '(lambda () (setenv "TERM" "dumb")))
+
+  (define-key eshell-mode-map (kbd "<tab>") 'completion-at-point)
+
+  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
+  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
+  (evil-normalize-keymaps)
+
+  (setq eshell-history-size         10000
+        eshell-buffer-maximum-lines 10000
+        eshell-prompt-regexp        "^λ "
+        eshell-highlight-prompt t
+        eshell-hist-ignoredups t
+        eshell-prompt-function 'rune/eshell-prompt
+        eshell-scroll-to-bottom-on-input t))
+
+(use-package eshell-git-prompt)
+
+(use-package eshell
+  :hook (eshell-first-time-mode . rune/configure-eshell)
+  :config
+  (with-eval-after-load 'esh-opt
+    (setq eshell-destroy-buffer-when-process-dies t)
+    (setq eshell-visual-commands '("htop" "zsh" "nvim")))
+  (eshell-git-prompt-use-theme 'powerline))
+
+(rune/leader-keys
+  "SPC" '(eshell :which-key "Eshell"))
+
+(use-package fish-completion
+  :hook (eshell-mode . fish-completion-mode))
+
+(use-package eshell-syntax-highlighting
+  :after esh-mode
+  :config
+  (eshell-syntax-highlighting-global-mode +1))
+
+(use-package esh-autosuggest
+  :hook (eshell-mode . esh-autosuggest-mode)
+  ;; :hook (eshell-mode-hook . esh-autosuggest-mode)
+  :config
+  (setq esh-autosuggest-use-company-map t)
+  (set-face-foreground 'company-preview-common "#4b5668")
+  (set-face-background 'company-preview nil))
+
 (use-package bufler
   :ensure t
   :bind (("C-M-j" . bufler-switch-buffer)
@@ -808,16 +974,30 @@
           ;; Group remaining buffers by major mode.
           (auto-mode))))
 
-(use-package dired
-  :ensure nil
-  :commands (dired dired-jump)
-  :bind (("C-x C-j" . dired-jump))
-  :custom ((dired-listing-switches "-agho --group-directories-first")
-           (delete-by-moving-to-trash t))
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'dired-single-up-directory
-    "l" 'dired-single-buffer))
+(when (equal system-name "Kavins-Air.Dlink")
+  (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :custom ((dired-listing-switches "-agho --group-directories-first")
+             (insert-directory-program "/usr/local/bin/gls")
+             (delete-by-moving-to-trash t))
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-single-up-directory
+      "l" 'dired-single-buffer)))
+
+(when (equal system-name "kavin-pc")
+  (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :custom ((dired-listing-switches "-agho --group-directories-first")
+             (delete-by-moving-to-trash t))
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-single-up-directory
+      "l" 'dired-single-buffer)))
 
 (use-package dired-single)
 
@@ -831,7 +1011,7 @@
                                 ("jpeg" . "open")
                                 ("pdf" . "open")
                                 ("mov" . "open")
-                                ("html" . "open")))
+                                ("html" . "open"))))
 
 (use-package dired-hide-dotfiles
   :hook (dired-mode . dired-hide-dotfiles-mode)
@@ -863,6 +1043,26 @@
     (dired-rainbow-define vc "#0074d9" ("git" "gitignore" "gitattributes" "gitmodules"))
     (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*")
     ))
+
+(use-package calfw
+  :disabled
+  :commands cfw:open-org-calendar
+  :config
+  (setq cfw:fchar-junction ?╋
+        cfw:fchar-vertical-line ?┃
+        cfw:fchar-horizontal-line ?━
+        cfw:fchar-left-junction ?┣
+        cfw:fchar-right-junction ?┫
+        cfw:fchar-top-junction ?┯
+        cfw:fchar-top-left-corner ?┏
+        cfw:fchar-top-right-corner ?┓)
+
+  (use-package calfw-org
+    :config
+    (setq cfw:org-agenda-schedule-args '(:timestamp))))
+
+(rune/leader-keys
+  "cc"  '(cfw:open-org-calendar :which-key "calendar"))
 
 (when (equal system-name "kavin-pc")
   (add-hook 'exwm-update-class-hook
