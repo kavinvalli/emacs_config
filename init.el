@@ -10,18 +10,22 @@
                      gcs-done)))
 
 (when (equal system-name "Kavins-Air.Dlink")
-(use-package dashboard
-  :ensure t
-  :config
-  (dashboard-setup-startup-hook)
-  (setq dashboard-banner-logo-title "Hey Kavin! Don't forget to see your agendas: M-x org-agenda-list")
-  (setq dashboard-items '((recents . 2)
-                          (projects . 2)
-                          (agenda . 10)))
-  (setq dashboard-set-file-icons t)
-  (setq dashboard-set-heading-icons t)
-  (setq dashboard-week-agenda t)
-  (setq dashboard-startup-banner 'logo))
+  (use-package dashboard
+    :diminish
+    (dashboard-mode page-break-lines-mode)
+    :config
+    (dashboard-setup-startup-hook)
+    (setq dashboard-banner-logo-title "Hey Kavin! Don't forget to see your agendas: M-x org-agenda-list")
+    (setq dashboard-items '((recents . 2)
+                            (projects . 2)
+                            (agenda . 10)))
+    (setq dashboard-set-file-icons t)
+    (setq dashboard-set-heading-icons t)
+    (setq dashboard-week-agenda t)
+    (setq dashboard-startup-banner 'logo)
+    :custom-face
+    (dashboard-heading ((t (:foreground "#fff" :weight bold))))
+    ))
 
 (setq rune/is-termux
       (string-suffix-p "Android" (string-trim (shell-command-to-string "uname -a"))))
@@ -115,7 +119,7 @@
 
 (use-package doom-themes :defer t)
 ;; (use-package spacemacs-theme :defer t)
-;; (load-theme 'doom-dracula t)
+(load-theme 'doom-dracula t)
 ;; (load-theme 'spacemacs-dark t)
 ;; (load-theme 'doom-palenight t)
 (load-theme 'doom-horizon t)
@@ -213,6 +217,10 @@
   :config
   (counsel-mode 1))
 
+(use-package smex ;; Adds M-x recent command sorting for counsel-M-x
+  :defer 1
+  :after counsel)
+
 (use-package helpful
   :custom
   (counsel-describe-function-function #'helpful-callable)
@@ -225,6 +233,10 @@
 
 (use-package autopair)
 (autopair-global-mode)
+
+(use-package evil-smartparens
+  :hook (smartparens-enabled-hook . evil-smartparens-mode)
+  (prog-mode . evil-smartparens-mode))
 
 (use-package emmet-mode
   :mode "\\.edge\\'"
@@ -507,6 +519,27 @@
   (org-tree-slide-breadcrumbs " // ")
   (org-image-actual-width nil))
 
+(use-package markdown-mode
+  ;; :pin melpa-stable
+  :mode "\\.md\\'"
+  :config
+  (defun dw/set-markdown-header-font-sizes ()
+  (font-lock-add-keywords 'markdown-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+    (dolist (face '((markdown-header-face-1 . 1.2)
+                    (markdown-header-face-2 . 1.1)
+                    (markdown-header-face-3 . 1.0)
+                    (markdown-header-face-4 . 1.0)
+                    (markdown-header-face-5 . 1.0)))
+      (set-face-attribute (car face) nil :font "Cantarell" :weight 'normal :height (cdr face)))
+    (set-face-attribute 'markdown-code-face nil :inherit '(shadow fixed-pitch)))
+
+  (defun rune/markdown-mode-hook ()
+    (dw/set-markdown-header-font-sizes))
+
+  (add-hook 'markdown-mode-hook 'rune/markdown-mode-hook))
+
 (use-package ox-reveal
   :ensure t
   :config
@@ -516,6 +549,10 @@
 
 (use-package htmlize
   :ensure t)
+
+(use-package emojify
+:hook (after-init . global-emojify-mode)
+:commands emojify-mode)
 
 (use-package counsel-osx-app
   :bind* ("S-M-SPC" . counsel-osx-app)
@@ -612,6 +649,10 @@
   :config
   (setq prettier-js-show-errors nil))
 
+(use-package jade-mode
+  :mode "\\.pug\\'")
+  ;; :hook (jade-mode . lsp-deferred))
+
 (use-package web-mode
   :mode "(\\.\\(html?\\|ejs\\|tsx\\|js[x]?\\|edge\\)\\'"
   :hook (web-mode . lsp-deferred)
@@ -641,12 +682,26 @@
   (setq scss-output-directory "../css")
   (setq scss-compile-at-save t))
 
-(use-package lsp-python-ms
-  :ensure t
-  :init (setq lsp-python-ms-auto-install-server t)
-  :hook (python-mode . (lambda ()
-                         (require 'lsp-python-ms)
-                          (lsp-deferred))))
+;; (use-package lsp-python-ms
+  ;;   :ensure t
+  ;;   :init (setq lsp-python-ms-auto-install-server t)
+  ;;   :hook (python-mode . (lambda ()
+  ;;                          (require 'lsp-python-ms)
+  ;;                           (lsp-deferred))))
+
+(use-package python-mode
+  :ensure t 
+  :hook (python-mode . lsp-deferred)
+  :custom
+  (python-shell-interpreter "python3"))
+
+(use-package yaml-mode
+  :hook (scss-mode . lsp-deferred)
+  :mode "\\.ya?ml\\'")
+
+(use-package flycheck
+  :defer t
+  :hook (lsp-mode . flycheck-mode))
 
 (use-package company
     :after lsp-mode
@@ -696,6 +751,69 @@
 
   (when (equal system-name "Kavins-Air.Dlink")
  (use-package forge))
+
+(use-package git-gutter
+  :diminish
+  :hook ((text-mode . git-gutter-mode)
+         (prog-mode . git-gutter-mode))
+  :config
+  (setq git-gutter:update-interval 2)
+  (require 'git-gutter-fringe)
+  (set-face-foreground 'git-gutter-fr:added "LightGreen")
+  (fringe-helper-define 'git-gutter-fr:added nil
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        ".........."
+                        ".........."
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        ".........."
+                        ".........."
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX")
+
+  (set-face-foreground 'git-gutter-fr:modified "LightGoldenrod")
+  (fringe-helper-define 'git-gutter-fr:modified nil
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        ".........."
+                        ".........."
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        ".........."
+                        ".........."
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX")
+
+  (set-face-foreground 'git-gutter-fr:deleted "LightCoral")
+  (fringe-helper-define 'git-gutter-fr:deleted nil
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        ".........."
+                        ".........."
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        ".........."
+                        ".........."
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX"
+                        "XXXXXXXXXX")
+
+  ;; These characters are used in terminal mode
+  (setq git-gutter:modified-sign "≡")
+  (setq git-gutter:added-sign "≡")
+  (setq git-gutter:deleted-sign "≡")
+  (set-face-foreground 'git-gutter:added "LightGreen")
+  (set-face-foreground 'git-gutter:modified "LightGoldenrod")
+  (set-face-foreground 'git-gutter:deleted "LightCoral"))
 
 (use-package lorem-ipsum
   :ensure t
@@ -792,10 +910,10 @@
   "ss" '(:ignore t :which-key "Search")
   "ssp" '(counsel-spotify-search-playlist :which-key "Search Playlist")
   "sst" '(counsel-spotify-search-track :which-key "Search Track")
-      "sp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
-      "sa" '(counsel-spotify-search-album :which-key "Search Album")
-      "s>" '(counsel-spotify-next :which-key "Next")
-      "s<" '(counsel-spotify-previous :which-key "Previous")))
+  "sp" '(counsel-spotify-toggle-play-pause :which-key "Toggle Play Pause")
+  "sa" '(counsel-spotify-search-album :which-key "Search Album")
+  "s>" '(counsel-spotify-next :which-key "Next")
+  "s<" '(counsel-spotify-previous :which-key "Previous")))
 
 (when (equal system-name "Kavins-Air.Dlink")
 (use-package ivy-youtube
@@ -892,8 +1010,8 @@
         eshell-prompt-regexp        "^λ "
         eshell-highlight-prompt t
         eshell-hist-ignoredups t
-        eshell-prompt-function 'rune/eshell-prompt
-        eshell-scroll-to-bottom-on-input t))
+        eshell-prompt-function 'rune/eshell-prompt))
+        ;; eshell-scroll-to-bottom-on-input t))
 
 (use-package eshell-git-prompt)
 
@@ -924,6 +1042,13 @@
   (set-face-foreground 'company-preview-common "#4b5668")
   (set-face-background 'company-preview nil))
 
+(use-package eshell-toggle
+  :bind ("C-M-'" . eshell-toggle)
+  :custom
+  (eshell-toggle-size-fraction 3)
+  (eshell-toggle-use-projectile-root t)
+  (eshell-toggle-run-command nil))
+
 (use-package bufler
   :ensure t
   :bind (("C-M-j" . bufler-switch-buffer)
@@ -934,7 +1059,7 @@
     (kbd "M-RET") 'bufler-list-buffer-peek
     "D"           'bufler-list-buffer-kill)
 
-  (setf bufler-groups
+  (setq bufler-groups
         (bufler-defgroups
           ;; Subgroup collecting all named workspaces.
           (group (auto-workspace))
@@ -1067,6 +1192,21 @@
     (start-process-shell-command "suspend" nil "systemctl suspend"))
 
   (rune/leader-keys
-    "s" '(rune/suspend :which-key "Suspend"))
+    "o" '(rune/suspend :which-key "Suspend"))
+
+(use-package cricbuzz)
 
 (+ 50 100)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+	 '(zlc yasnippet yaml-mode which-key web-mode vterm visual-fill-column visual-fill use-package typescript-mode sx spotify speed-type spacemacs-theme smex skewer-mode scss-mode rustic rainbow-mode rainbow-delimiters racer python-mode pug-mode prettier-js pdf-tools ox-reveal org-wild-notifier org-tree-slide org-special-block-extras org-plus-contrib org-make-toc org-gcal org-bullets org-alert ob-dart monokai-theme lua-mode lsp-ui lsp-python-ms lsp-ivy lsp-dart lorem-ipsum jade-mode ivy-youtube ivy-rich ivy-pass impatient-mode hide-mode-line helpful google-translate git-gutter-fringe general forge flycheck fish-completion exwm exec-path-from-shell evil-smartparens evil-nerd-commenter evil-magit evil-collection eterm-256color eshell-toggle eshell-syntax-highlighting eshell-git-prompt esh-autosuggest emojify emmet-mode elcord doom-themes doom-modeline dired-single dired-sidebar dired-rainbow dired-open dired-hide-dotfiles dashboard darkroom cricbuzz counsel-spotify counsel-projectile counsel-osx-app company-tabnine company-racer company-box comment-tags command-log-mode cargo calfw-org calfw bufler autothemer autopair all-the-icons-dired afternoon-theme)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(dashboard-heading ((t (:foreground "#fff" :weight bold)))))
